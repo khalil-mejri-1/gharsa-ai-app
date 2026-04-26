@@ -381,7 +381,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <LinearGradient
-        colors={[tokens.surfaceContainerLowest, tokens.surface]}
+        colors={['transparent', 'transparent']}
         style={styles.langBtn}
       >
         <Text style={styles.langText}>{label}</Text>
@@ -450,7 +450,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
   },
   langSelector: {
     flexDirection: 'row',
-    backgroundColor: tokens.surfaceContainerLow,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 20,
     padding: 3,
     borderWidth: 1,

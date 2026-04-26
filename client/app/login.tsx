@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,6 +23,16 @@ export default function LoginPage() {
   const router = useRouter();
   const { tokens, mode } = useAppTheme();
   const styles = getStyles(tokens, mode);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const uid = await AsyncStorage.getItem('userId');
+      if (uid) {
+        router.replace('/(tabs)/dashboard');
+      }
+    };
+    checkLogin();
+  }, []);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -137,24 +147,24 @@ export default function LoginPage() {
           style={[styles.topAppBarInner, { backgroundColor: tokens.surfaceContainerLowest }]}
         >
           <View style={styles.topAppBarContent}>
-            <View style={styles.userInfo}>
+            <TouchableOpacity 
+              style={styles.userInfo}
+              onPress={() => router.push('/')}
+              activeOpacity={0.7}
+            >
               <View style={styles.avatarContainer}>
                 <Image source={require('@/assets/images/logo_gharsa.png')} style={styles.avatar} />
               </View>
               <Text style={styles.appTitle} numberOfLines={1} ellipsizeMode="tail">{t('appTitle')}</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.topBarRight}>
               <View style={styles.langSelector}>
                 <LangBtn active={language === 'EN'} label="EN" onPress={() => setLanguage('EN')} />
                 <LangBtn active={language === 'AR'} label="AR" onPress={() => setLanguage('AR')} />
                 <LangBtn active={language === 'FR'} label="FR" onPress={() => setLanguage('FR')} />
               </View>
-              <TouchableOpacity style={styles.iconBtn}>
-                <GradientIcon colors={tokens.gradients.green} name="notifications" size={22} library={MaterialIcons} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconBtn} onPress={() => router.push('/')}>
-                <GradientIcon colors={tokens.gradients.green} name="home" size={24} library={MaterialIcons} />
-              </TouchableOpacity>
+
+
             </View>
           </View>
         </View>
@@ -322,7 +332,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <LinearGradient
-        colors={[tokens.surfaceContainerLowest, tokens.surface]}
+        colors={['transparent', 'transparent']}
         style={styles.langBtn}
       >
         <Text style={styles.langText}>{label}</Text>
@@ -354,10 +364,10 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: 70,
     zIndex: 100,
     borderRadius: 35,
-    shadowColor: tokens.primary,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
     elevation: 3,
   },
   topAppBarInner: {
@@ -403,7 +413,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
   },
   langSelector: {
     flexDirection: 'row',
-    backgroundColor: tokens.surfaceContainerLow,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 20,
     padding: 3,
     borderWidth: 1,

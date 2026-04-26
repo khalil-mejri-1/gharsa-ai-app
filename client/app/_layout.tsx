@@ -25,14 +25,15 @@ function RootContent() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Perform any necessary data fetching or font loading here
-        // We'll simulate a 2.5s load time to show off the creative splash
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        // Hide the system splash screen immediately so our CustomSplashScreen can be seen
+        await SplashScreen.hideAsync();
+        
+        // Simulate loading time for the custom animation
+        await new Promise(resolve => setTimeout(resolve, 3500));
       } catch (e) {
         console.warn(e);
       } finally {
         setAppIsReady(true);
-        await SplashScreen.hideAsync();
       }
     }
 

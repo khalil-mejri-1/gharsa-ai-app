@@ -71,8 +71,8 @@ export default function TabLayout() {
     }
   };
 
-  // Hide FAB if we are already on the chatbot page
-  const showFab = pathname !== '/chatbot';
+  // Hide FAB if we are on the chatbot page, landing page, or login page
+  const showFab = pathname !== '/chatbot' && pathname !== '/' && pathname !== '/login';
 
   return (
     <View style={{ flex: 1 }}>
