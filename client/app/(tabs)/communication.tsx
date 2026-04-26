@@ -10,6 +10,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAppTheme } from '@/hooks/ThemeContext';
 import CustomAvatar from '@/components/CustomAvatar';
 import { SkeletonCircle, SkeletonRect } from '@/components/Skeleton';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 import { useLanguage } from '@/hooks/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -346,12 +347,12 @@ export default function CommunicationScreen() {
             </View>
             <View style={styles.createPostActions}>
               <TouchableOpacity style={styles.postActionItem} onPress={() => pickMedia('image')}>
-                <MaterialIcons name="image" size={20} color="#4caf50" />
+                <GradientIcon colors={tokens.gradients.green} name="image" size={20} library={MaterialIcons} />
                 <Text style={styles.postActionText}>{t('photo')}</Text>
               </TouchableOpacity>
               <View style={styles.actionDivider} />
               <TouchableOpacity style={styles.postActionItem} onPress={() => pickMedia('video')}>
-                <MaterialIcons name="videocam" size={20} color="#e91e63" />
+                <GradientIcon colors={tokens.gradients.red} name="videocam" size={20} library={MaterialIcons} />
                 <Text style={styles.postActionText}>{t('video')}</Text>
               </TouchableOpacity>
             </View>
@@ -384,11 +385,18 @@ export default function CommunicationScreen() {
 
             {(newPostContent.length > 0 || selectedMedia) && (
               <TouchableOpacity 
-                style={[styles.postButton, isPosting && { opacity: 0.5 }]} 
+                style={[styles.postButtonContainer, isPosting && { opacity: 0.5 }]} 
                 onPress={() => handleCreatePost()}
                 disabled={isPosting}
               >
-                <Text style={styles.postButtonText}>{isPosting ? 'Posting...' : 'Post Now'}</Text>
+                <LinearGradient
+                  colors={tokens.gradients.green}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.postButton}
+                >
+                  <Text style={styles.postButtonText}>{isPosting ? 'Posting...' : 'Post Now'}</Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </View>
@@ -494,43 +502,6 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
   );
 }
 
-function GradientText({ colors, children, style }: any) {
-  if (Platform.OS === 'web') {
-    return <Text style={[style, { color: colors[0] }]}>{children}</Text>;
-  }
-  return (
-    <MaskedView
-      maskElement={<Text style={style}>{children}</Text>}
-    >
-      <LinearGradient
-        colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <Text style={[style, { opacity: 0 }]}>{children}</Text>
-      </LinearGradient>
-    </MaskedView>
-  );
-}
-
-function GradientIcon({ colors, name, size, library: IconLibrary }: any) {
-  if (Platform.OS === 'web') {
-    return <IconLibrary name={name} size={size} color={colors[0]} />;
-  }
-  return (
-    <MaskedView
-      maskElement={<IconLibrary name={name} size={size} color="white" />}
-    >
-      <LinearGradient
-        colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      >
-        <IconLibrary name={name} size={size} style={{ opacity: 0 }} />
-      </LinearGradient>
-    </MaskedView>
-  );
-}
 
 
 const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
@@ -666,12 +637,14 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     color: tokens.onSurface,
     fontSize: 14,
   },
-  postButton: {
-    backgroundColor: tokens.primary,
-    borderRadius: 12,
-    paddingVertical: 8,
-    alignItems: 'center',
+  postButtonContainer: {
     marginTop: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  postButton: {
+    paddingVertical: 10,
+    alignItems: 'center',
   },
   postButtonText: {
     color: 'white',

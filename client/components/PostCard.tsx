@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useLanguage } from '@/hooks/LanguageContext';
 import { API_URL } from '@/constants/config';
 import CustomAvatar from './CustomAvatar';
+import { GradientText, GradientIcon } from './GradientUI';
 
 interface PostCardProps {
   post: any;
@@ -112,21 +113,39 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
     }
   };
 
+  const formatTimeAgo = (date: string | Date) => {
+    if (!date) return '';
+    const now = new Date();
+    const postDate = new Date(date);
+    const diffInSeconds = Math.floor((now.getTime() - postDate.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return t('justNow') || 'Just now';
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}${t('m') || 'm'}`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}${t('h') || 'h'}`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}${t('d') || 'd'}`;
+  };
+
   return (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
         <TouchableOpacity onPress={() => router.push(`/profile/${post.user}`)}>
-          <CustomAvatar uri={post.avatar} name={post.fullName} size={48} style={styles.postAvatar} />
+          <CustomAvatar uri={post.avatar} name={post.fullName} size={40} style={styles.postAvatar} />
         </TouchableOpacity>
         <View style={styles.postInfo}>
-          <TouchableOpacity onPress={() => router.push(`/profile/${post.user}`)}>
-            <Text style={styles.postUser}>{post.fullName}</Text>
-          </TouchableOpacity>
+          <View style={styles.userRow}>
+            <TouchableOpacity onPress={() => router.push(`/profile/${post.user}`)}>
+              <Text style={styles.postUser}>{post.fullName}</Text>
+            </TouchableOpacity>
+            <Text style={styles.timeText}>• {formatTimeAgo(post.createdAt || post.time)}</Text>
+          </View>
           <Text style={styles.postRole}>{post.role}</Text>
         </View>
         {post.user === userId && (
           <TouchableOpacity onPress={handleDeletePost} style={{ marginLeft: 10 }}>
-            {isDeleting ? <ActivityIndicator size="small" color="#ff4d4d" /> : <MaterialIcons name="delete-sweep" size={22} color="#ff4d4d" />}
+            {isDeleting ? <ActivityIndicator size="small" color={tokens.gradients.red[0]} /> : <GradientIcon colors={tokens.gradients.red} name="delete-sweep" size={22} library={MaterialIcons} />}
           </TouchableOpacity>
         )}
       </View>
@@ -137,25 +156,29 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
         <Image source={{ uri: post.image }} style={styles.postImage} contentFit="cover" />
       )}
 
-      <View style={styles.statsRow}>
-        <TouchableOpacity style={styles.statItem} onPress={onShowLikers}>
-          <Ionicons name="heart" size={14} color="#ff4d4d" />
-          <Text style={styles.statText}>{post.likes.length} likes</Text>
+      {post.likes.length > 0 && (
+        <TouchableOpacity style={styles.likesCountRow} onPress={onShowLikers}>
+          <View style={styles.likersAvatars}>
+             <GradientIcon colors={tokens.gradients.red} name="heart" size={12} library={Ionicons} />
+             <Text style={styles.likesCountText}>
+               {post.likes.length} {post.likes.length === 1 ? t('like') : t('likes')}
+             </Text>
+          </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.statItem} onPress={() => setShowComments(!showComments)}>
-          <Ionicons name="chatbubble" size={14} color={tokens.primary} />
-          <Text style={styles.statText}>{post.comments.length} comments</Text>
-        </TouchableOpacity>
-      </View>
+      )}
 
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
           {isLiked ? (
-            <GradientIcon colors={['#FF5252', '#D32F2F']} name="heart" size={22} library={Ionicons} />
+            <GradientIcon colors={tokens.gradients.red} name="heart" size={22} library={Ionicons} />
           ) : (
-            <Ionicons name="heart-outline" size={22} color={tokens.onSurfaceVariant} />
+            <GradientIcon colors={tokens.gradients.gray} name="heart-outline" size={22} library={Ionicons} />
           )}
-          <Text style={[styles.actionBtnText, isLiked && { color: '#FF5252' }]}>{isLiked ? t('liked') : t('like')}</Text>
+          {isLiked ? (
+             <GradientText colors={tokens.gradients.red} style={styles.actionBtnText}>{t('liked')}</GradientText>
+          ) : (
+             <GradientText colors={tokens.gradients.gray} style={styles.actionBtnText}>{t('like')}</GradientText>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -163,13 +186,15 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
           onPress={() => setShowComments(!showComments)}
         >
           {showComments ? (
-            <GradientIcon colors={['#66BB6A', '#2E7D32']} name="chatbubble" size={20} library={Ionicons} />
+            <GradientIcon colors={tokens.gradients.green} name="chatbubble" size={20} library={Ionicons} />
           ) : (
-            <Ionicons name="chatbubble-outline" size={20} color={tokens.onSurfaceVariant} />
+            <GradientIcon colors={tokens.gradients.gray} name="chatbubble-outline" size={20} library={Ionicons} />
           )}
-          <Text style={[styles.actionBtnText, showComments && { color: tokens.primary }]}>
-            {showComments ? t('hide') : t('comment')}
-          </Text>
+          {showComments ? (
+             <GradientText colors={tokens.gradients.green} style={styles.actionBtnText}>{post.comments.length > 0 && `${post.comments.length} `}{t('hide')}</GradientText>
+          ) : (
+             <GradientText colors={tokens.gradients.gray} style={styles.actionBtnText}>{post.comments.length > 0 && `${post.comments.length} `}{t('comment')}</GradientText>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -186,9 +211,9 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
                   {comment.user === userId && (
                     <TouchableOpacity onPress={() => handleDeleteComment(comment._id)} disabled={isDeletingComment === comment._id}>
                       {isDeletingComment === comment._id ? (
-                        <ActivityIndicator size="small" color="#ff4d4d" />
+                        <ActivityIndicator size="small" color={tokens.gradients.red[0]} />
                       ) : (
-                        <MaterialIcons name="delete-outline" size={14} color="#ff4d4d" />
+                        <GradientIcon colors={tokens.gradients.red} name="delete-outline" size={14} library={MaterialIcons} />
                       )}
                     </TouchableOpacity>
                   )}
@@ -202,7 +227,7 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
             <TextInput
               style={[
                 styles.replyInput,
-                isFocused && { borderColor: tokens.primary, borderWidth: 1 }
+                isFocused && { borderColor: tokens.gradients.green[0], borderWidth: 1 }
               ]}
               placeholder={t('writeReply')}
               placeholderTextColor={tokens.onSurfaceVariant}
@@ -217,9 +242,9 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
             />
             <TouchableOpacity onPress={handleComment} disabled={isCommenting}>
               {isCommenting ? (
-                <ActivityIndicator size="small" color={tokens.primary} />
+                <ActivityIndicator size="small" color={tokens.gradients.green[0]} />
               ) : (
-                <MaterialIcons name="send" size={20} color={tokens.primary} />
+                <GradientIcon colors={tokens.gradients.green} name="send" size={20} library={MaterialIcons} />
               )}
             </TouchableOpacity>
           </View>
@@ -229,87 +254,74 @@ export default function PostCard({ post, tokens, mode, userId, userAvatar, onRef
   );
 }
 
-function GradientText({ colors, children, style }: any) {
-  if (Platform.OS === 'web') return <Text style={[style, { color: colors[0] }]}>{children}</Text>;
-  return (
-    <MaskedView maskElement={<Text style={style}>{children}</Text>}>
-      <LinearGradient colors={colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-        <Text style={[style, { opacity: 0 }]}>{children}</Text>
-      </LinearGradient>
-    </MaskedView>
-  );
-}
 
-function GradientIcon({ colors, name, size, library: IconLibrary }: any) {
-  if (Platform.OS === 'web') return <IconLibrary name={name} size={size} color={colors[0]} />;
-  return (
-    <MaskedView maskElement={<IconLibrary name={name} size={size} color="white" />}>
-      <LinearGradient colors={colors} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
-        <IconLibrary name={name} size={size} style={{ opacity: 0 }} />
-      </LinearGradient>
-    </MaskedView>
-  );
-}
 
 const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
   postCard: {
     backgroundColor: mode === 'dark' ? tokens.surfaceContainerLow + '70' : '#ffffff',
-    borderRadius: 28,
-    padding: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: tokens.primary + '30', // Faint green border
+    borderRadius: 20,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: tokens.gradients.green[0] + '30',
   },
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   postAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   postInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 10,
+  },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  timeText: {
+    fontSize: 12,
+    color: tokens.onSurfaceVariant,
+    opacity: 0.6,
   },
   postUser: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: tokens.onSurface,
   },
   postRole: {
-    fontSize: 12,
+    fontSize: 11,
     color: tokens.onSurfaceVariant,
     opacity: 0.7,
   },
   tagBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   tagText: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '900',
   },
   postText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
     color: tokens.onSurface,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   postImage: {
     width: '100%',
-    height: 220,
-    borderRadius: 20,
-    marginBottom: 16,
+    height: 200,
+    borderRadius: 16,
+    marginBottom: 12,
   },
   statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    display: 'none', // Removed to save space
   },
   statItem: {
     flexDirection: 'row',
@@ -317,51 +329,66 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     gap: 6,
   },
   statText: {
-    fontSize: 13,
+    fontSize: 12,
     color: tokens.onSurfaceVariant,
     fontWeight: '500',
+  },
+  likesCountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  likersAvatars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  likesCountText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: tokens.onSurfaceVariant,
   },
   actionRow: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderBottomWidth: 1,
     borderColor: tokens.outlineVariant + '15',
-    paddingVertical: 12,
+    paddingTop: 10,
     justifyContent: 'space-around',
-    marginBottom: 16,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   actionBtnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: tokens.onSurfaceVariant,
   },
   commentList: {
-    gap: 16,
+    gap: 12,
+    marginTop: 12,
   },
   commentWrapper: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   commentAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   commentBubble: {
     flex: 1,
     backgroundColor: mode === 'dark' ? tokens.surfaceContainerLowest + '60' : '#f0f4f2',
-    padding: 12,
-    borderRadius: 18,
+    padding: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 2,
   },
   expertBubble: {
-    backgroundColor: mode === 'dark' ? tokens.primaryContainer + '30' : tokens.primary + '08',
-    borderColor: tokens.primary + '30',
+    backgroundColor: mode === 'dark' ? tokens.gradients.green[0] + '20' : tokens.gradients.green[0] + '08',
+    borderColor: tokens.gradients.green[0] + '40',
     borderWidth: 1,
   },
   commentHeader: {

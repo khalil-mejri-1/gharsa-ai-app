@@ -23,6 +23,14 @@ export const DESIGN_TOKENS = {
     appBgGradientStart: '#f8faf9',
     appBgGradientMid: '#f8faf9',
     appBgGradientEnd: '#f8faf9',
+    gradients: {
+      green: ['#059669', '#059669'],
+      red: ['#FF5252', '#B71C1C'],
+      gray: ['#9E9E9E', '#616161'],
+      textGray: ['#757575', '#424242'],
+      orange: ['#FFB75E', '#ED8F03'],
+      blue: ['#42A5F5', '#1976D2'],
+    }
   },
   dark: {
     primary: '#0ad62c',
@@ -46,6 +54,14 @@ export const DESIGN_TOKENS = {
     appBgGradientStart: '#020d08',
     appBgGradientMid: '#061710',
     appBgGradientEnd: '#020d08',
+    gradients: {
+      green: ['#0ad62c', '#0d631b'],
+      red: ['#ff4d4d', '#800000'],
+      gray: ['#E0E0E0', '#9E9E9E'],
+      textGray: ['#B0BEC5', '#78909C'],
+      orange: ['#ff9966', '#ff5e62'],
+      blue: ['#00d2ff', '#3a7bd5'],
+    }
   }
 };
 

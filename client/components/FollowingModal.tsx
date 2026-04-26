@@ -11,6 +11,8 @@ import { API_URL } from '@/constants/config';
 const { width, height } = Dimensions.get('window');
 
 import { DeviceEventEmitter } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GradientText } from './GradientUI';
 
 // Removed MOCK_MESSAGES
 
@@ -88,7 +90,11 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
   return (
     <Modal visible={visible} transparent animationType="none">
       <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-        <Animated.View style={{ flex: 1, backgroundColor: '#0b1a13', transform: [{ translateX: slideAnim }] }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateX: slideAnim }] }}>
+          <LinearGradient 
+            colors={[tokens.appBgGradientStart, tokens.appBgGradientMid, tokens.appBgGradientEnd]}
+            style={{ flex: 1 }}
+          >
           <SafeAreaView style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
@@ -134,7 +140,7 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
                     >
                       <View style={styles.noteAvatarWrapper}>
                         <Image source={{ uri: user.avatar }} style={styles.noteAvatar} />
-                        <View style={styles.onlineBadge} />
+                        <LinearGradient colors={tokens.gradients.green} style={styles.onlineBadge} />
                       </View>
                       <Text style={[styles.noteName, { color: tokens.onSurface }]} numberOfLines={1}>
                         {user.fullName.split(' ')[0]}
@@ -150,7 +156,7 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
               <View style={styles.msgHeaderRow}>
                 <Text style={[styles.sectionTitle, { color: tokens.onSurface }]}>Messages</Text>
                 <TouchableOpacity>
-                  <Text style={{ color: tokens.primary, fontWeight: '600' }}>Requests</Text>
+                  <GradientText colors={tokens.gradients.green} style={{ fontWeight: '600' }}>Requests</GradientText>
                 </TouchableOpacity>
               </View>
 
@@ -186,15 +192,16 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
                     </Text>
                   </View>
                   {conv.unreadCount > 0 && (
-                    <View style={[styles.unreadBadge, { backgroundColor: tokens.primary }]}>
+                    <LinearGradient colors={tokens.gradients.green} style={styles.unreadBadge}>
                       <Text style={styles.unreadText}>{conv.unreadCount}</Text>
-                    </View>
+                    </LinearGradient>
                   )}
                 </TouchableOpacity>
               ))}
             </View>
           </ScrollView>
         </SafeAreaView>
+        </LinearGradient>
         </Animated.View>
       </View>
     </Modal>
@@ -281,7 +288,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 2,
-    backgroundColor: '#4caf50',
     width: 14,
     height: 14,
     borderRadius: 7,

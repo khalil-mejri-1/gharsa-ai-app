@@ -67,6 +67,12 @@ const translations = {
     orRegisterWith: 'OR REGISTER WITH',
     joinFarmers: 'JOIN +12,000 FARMERS',
     alreadyHaveAccount: 'Already have an account?',
+    detectedDisease: 'Detected Disease',
+    confidence: 'Confidence',
+    scanAgain: 'Scan Again',
+    error: 'Error',
+    serverError: 'Server Connection Failed',
+    permissionDenied: 'Permission Denied',
   },
   AR: {
     appTitle: 'غرسة الذكي',
@@ -132,6 +138,12 @@ const translations = {
     orRegisterWith: 'أو التسجيل بواسطة',
     joinFarmers: 'انضم إلى +12,000 مزارع',
     alreadyHaveAccount: 'لديك حساب بالفعل؟',
+    detectedDisease: 'المرض المكتشف',
+    confidence: 'نسبة التأكد',
+    scanAgain: 'فحص مرة أخرى',
+    error: 'خطأ',
+    serverError: 'فشل الاتصال بالسيرفر',
+    permissionDenied: 'تم رفض الإذن',
   },
   FR: {
     appTitle: 'Gharsa AI',
@@ -197,6 +209,12 @@ const translations = {
     orRegisterWith: 'OU S\'INSCRIRE AVEC',
     joinFarmers: 'REJOIGNEZ +12 000 AGRICULTEURS',
     alreadyHaveAccount: 'Vous avez déjà un compte ?',
+    detectedDisease: 'Maladie Détectée',
+    confidence: 'Confiance',
+    scanAgain: 'Scanner à Nouveau',
+    error: 'Erreur',
+    serverError: 'Échec de la Connexion au Serveur',
+    permissionDenied: 'Permission Refusée',
   },
 };
 

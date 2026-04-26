@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useAppTheme } from '@/hooks/ThemeContext';
 import { API_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GradientText } from './GradientUI';
 
 interface User {
   _id: string;
@@ -62,9 +63,9 @@ export default function ConnectionsModal({ visible, onClose, userId, type }: Con
       />
       <View style={styles.userInfo}>
         <Text style={[styles.userName, { color: tokens.onSurface }]}>{item.fullName}</Text>
-        <Text style={[styles.userRole, { color: tokens.primary }]}>
+        <GradientText colors={tokens.gradients.green} style={styles.userRole}>
           {item.role === 'user' ? 'Farmer' : (item.role ? item.role.charAt(0).toUpperCase() + item.role.slice(1) : 'Farmer')}
-        </Text>
+        </GradientText>
       </View>
       <Ionicons name="chevron-forward" size={20} color={tokens.outline} />
     </TouchableOpacity>
@@ -72,7 +73,10 @@ export default function ConnectionsModal({ visible, onClose, userId, type }: Con
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0b1a13' }]}>
+      <LinearGradient 
+        colors={[tokens.appBgGradientStart, tokens.appBgGradientMid, tokens.appBgGradientEnd]}
+        style={StyleSheet.absoluteFill}
+      >
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.container}>
             <View style={styles.header}>
@@ -86,7 +90,7 @@ export default function ConnectionsModal({ visible, onClose, userId, type }: Con
 
             {loading ? (
               <View style={styles.center}>
-                <ActivityIndicator size="large" color={tokens.primary} />
+                <ActivityIndicator size="large" color={tokens.gradients.green[0]} />
               </View>
             ) : users.length === 0 ? (
               <View style={styles.center}>
@@ -106,7 +110,7 @@ export default function ConnectionsModal({ visible, onClose, userId, type }: Con
             )}
           </View>
         </SafeAreaView>
-      </View>
+      </LinearGradient>
     </Modal>
   );
 }

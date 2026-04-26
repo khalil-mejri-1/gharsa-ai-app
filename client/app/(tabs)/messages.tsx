@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions
 import { Image } from 'expo-image';
 import { useRouter, Stack, useNavigation } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/hooks/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
@@ -146,7 +147,7 @@ export default function MessagesTab() {
                   >
                     <View style={styles.noteAvatarWrapper}>
                       <Image source={{ uri: user.avatar }} style={styles.noteAvatar} />
-                      <View style={styles.onlineBadge} />
+                      <LinearGradient colors={tokens.gradients.green} style={styles.onlineBadge} />
                     </View>
                     <Text style={[styles.noteName, { color: tokens.onSurface }]} numberOfLines={1}>
                       {user.fullName.split(' ')[0]}
@@ -198,9 +199,9 @@ export default function MessagesTab() {
                     </Text>
                   </View>
                   {conv.unreadCount > 0 && (
-                    <View style={[styles.unreadBadge, { backgroundColor: tokens.primary }]}>
+                    <LinearGradient colors={tokens.gradients.green} style={styles.unreadBadge}>
                       <Text style={styles.unreadText}>{conv.unreadCount}</Text>
-                    </View>
+                    </LinearGradient>
                   )}
                 </TouchableOpacity>
               ))
@@ -269,7 +270,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 2,
-    backgroundColor: '#4caf50',
     width: 14,
     height: 14,
     borderRadius: 7,

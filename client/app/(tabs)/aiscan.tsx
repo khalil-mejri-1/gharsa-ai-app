@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAr
 import { Image } from 'expo-image';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
+import { ActivityIndicator, Alert } from 'react-native';
+import { ML_URL } from '@/constants/config';
 
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '@/hooks/ThemeContext';
@@ -23,6 +26,9 @@ export default function AIScanScreen() {
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [prediction, setPrediction] = useState<{ disease: string, confidence: number } | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -41,6 +47,66 @@ export default function AIScanScreen() {
     });
     return unsubscribe;
   }, [navigation]);
+  
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('error'), t('permissionDenied'));
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setSelectedImage(uri);
+      setPrediction(null);
+      uploadImage(uri);
+    }
+  };
+
+  const uploadImage = async (imageUri: string) => {
+    setIsPredicting(true);
+    const formData = new FormData();
+    
+    // @ts-ignore
+    formData.append('image', {
+      uri: imageUri,
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+    });
+
+    try {
+      const response = await fetch(`${ML_URL}/predict`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.disease) {
+        setPrediction({
+          disease: data.disease,
+          confidence: data.confidence
+        });
+      } else {
+        Alert.alert(t('error'), data.error || 'Prediction failed');
+      }
+    } catch (error) {
+      console.error("Prediction Error:", error);
+      Alert.alert(t('error'), t('serverError'));
+    } finally {
+      setIsPredicting(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -94,18 +160,44 @@ export default function AIScanScreen() {
 
         <View style={styles.content}>
           <View style={styles.scannerCircle}>
-             <Ionicons name="scan-outline" size={80} color={tokens.primary} />
+             {selectedImage ? (
+               <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+             ) : (
+               <Ionicons name="scan-outline" size={80} color={tokens.gradients.green[0]} />
+             )}
+             {isPredicting && (
+               <View style={styles.loadingOverlay}>
+                 <ActivityIndicator size="large" color="white" />
+               </View>
+             )}
           </View>
-          <Text style={styles.mainTitle}>{t('aiPlantDiagnosis')}</Text>
-          <Text style={styles.subtitle}>{t('scanSubtitle')}</Text>
+
+          {prediction ? (
+            <View style={styles.resultContainer}>
+              <Text style={styles.resultLabel}>{t('detectedDisease')}:</Text>
+              <Text style={styles.resultValue}>{prediction.disease}</Text>
+              <Text style={styles.confidenceText}>{t('confidence')}: {(prediction.confidence * 100).toFixed(2)}%</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.mainTitle}>{t('aiPlantDiagnosis')}</Text>
+              <Text style={styles.subtitle}>{t('scanSubtitle')}</Text>
+            </>
+          )}
           
-          <TouchableOpacity style={styles.scanBtn}>
+          <TouchableOpacity 
+            style={styles.scanBtn} 
+            onPress={pickImage}
+            disabled={isPredicting}
+          >
             <LinearGradient
-              colors={[tokens.primary, tokens.primaryContainer]}
+              colors={tokens.gradients.green}
               style={styles.scanBtnGradient}
             >
               <MaterialIcons name="camera-alt" size={24} color="white" />
-              <Text style={styles.scanBtnText}>{t('startScanning')}</Text>
+              <Text style={styles.scanBtnText}>
+                {prediction ? t('scanAgain') : t('startScanning')}
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -122,7 +214,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         <LinearGradient
-          colors={[tokens.primaryContainer, tokens.primary]}
+          colors={tokens.gradients.green}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.langBtnActive}
@@ -158,7 +250,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: 70,
     zIndex: 100,
     borderRadius: 35,
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -170,7 +262,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     overflow: 'hidden',
     paddingHorizontal: 16,
     borderWidth: 1.5,
-    borderColor: tokens.primary + '30',
+    borderColor: tokens.gradients.green[0] + '40',
   },
   topAppBarContent: {
     flexDirection: 'row',
@@ -254,12 +346,12 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: 180,
     borderRadius: 90,
     borderWidth: 2,
-    borderColor: tokens.primary,
+    borderColor: tokens.gradients.green[0],
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 30,
-    backgroundColor: tokens.primary + '10',
+    backgroundColor: tokens.gradients.green[0] + '15',
   },
   mainTitle: {
     fontSize: 26,
@@ -281,7 +373,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
     elevation: 8,
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
@@ -297,5 +389,48 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '800',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 90,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 90,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resultContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+    backgroundColor: tokens.surfaceContainerLow,
+    padding: 20,
+    borderRadius: 24,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: tokens.gradients.green[0] + '30',
+  },
+  resultLabel: {
+    fontSize: 14,
+    color: tokens.onSurfaceVariant,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  resultValue: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: tokens.gradients.green[0],
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  confidenceText: {
+    fontSize: 12,
+    color: tokens.onSurfaceVariant,
+    opacity: 0.8,
+    fontWeight: '600',
   }
 });

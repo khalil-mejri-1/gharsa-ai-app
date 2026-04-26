@@ -9,8 +9,8 @@ import { io } from 'socket.io-client';
 import { useRouter } from 'expo-router';
 import { API_URL, SOCKET_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
 import { Platform } from 'react-native';
+import { GradientText, GradientIcon } from './GradientUI';
 
 
 export default function NotificationModal() {
@@ -158,43 +158,7 @@ export default function NotificationModal() {
     return `${diffInDays}d`;
   };
 
-  function GradientIcon({ colors, name, size, library: IconLibrary }: any) {
-    if (Platform.OS === 'web') {
-      return <IconLibrary name={name} size={size} color={colors[0]} />;
-    }
-    return (
-      <MaskedView
-        maskElement={<IconLibrary name={name} size={size} color="white" />}
-      >
-        <LinearGradient
-          colors={colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-        >
-          <IconLibrary name={name} size={size} style={{ opacity: 0 }} />
-        </LinearGradient>
-      </MaskedView>
-    );
-  }
 
-  function GradientText({ colors, children, style }: any) {
-    if (Platform.OS === 'web') {
-      return <Text style={[style, { color: colors[0] }]}>{children}</Text>;
-    }
-    return (
-      <MaskedView
-        maskElement={<Text style={style}>{children}</Text>}
-      >
-        <LinearGradient
-          colors={colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <Text style={[style, { opacity: 0 }]}>{children}</Text>
-        </LinearGradient>
-      </MaskedView>
-    );
-  }
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -239,7 +203,7 @@ export default function NotificationModal() {
             ? (mode === 'dark' ? 'rgba(76, 175, 80, 0.15)' : 'rgba(76, 175, 80, 0.1)') 
             : (mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)') 
         },
-        !item.isRead && { borderColor: '#4caf50', borderWidth: 1 }
+        !item.isRead && { borderColor: tokens.gradients.green[0], borderWidth: 1 }
       ]}
     >
       <View style={styles.avatarWrapper}>
@@ -268,7 +232,7 @@ export default function NotificationModal() {
           {getRelativeTime(item.createdAt)} • {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>
-      {!item.isRead && <View style={styles.unreadDot} />}
+      {!item.isRead && <LinearGradient colors={tokens.gradients.green} style={styles.unreadDot} />}
     </TouchableOpacity>
   );
 
@@ -277,7 +241,10 @@ export default function NotificationModal() {
   return (
     <View style={{ position: 'absolute', width: 0, height: 0 }}>
       <Modal visible={visible} transparent animationType="slide" onRequestClose={() => setVisible(false)}>
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0b1a13' }]}>
+        <LinearGradient 
+          colors={[tokens.appBgGradientStart, tokens.appBgGradientMid, tokens.appBgGradientEnd]}
+          style={StyleSheet.absoluteFill}
+        >
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, { backgroundColor: tokens.surfaceContainerLowest }]}>
               <View style={styles.header}>
@@ -320,7 +287,7 @@ export default function NotificationModal() {
               )}
             </View>
           </View>
-          </View>
+        </LinearGradient>
       </Modal>
 
       {/* Real-time Toast Notification */}
@@ -439,7 +406,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#4caf50',
     marginLeft: 12,
     shadowColor: '#4caf50',
     shadowOffset: { width: 0, height: 0 },

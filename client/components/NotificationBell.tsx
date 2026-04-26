@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, DeviceEventEmitter } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/hooks/ThemeContext';
+import { GradientIcon } from './GradientUI';
 
 export default function NotificationBell() {
   const { tokens, mode } = useAppTheme();
@@ -20,13 +22,18 @@ export default function NotificationBell() {
 
   return (
     <TouchableOpacity style={styles(tokens, mode).iconBtn} onPress={handlePress}>
-      <MaterialIcons name="notifications" size={22} color={tokens.primary} />
+      <GradientIcon colors={tokens.gradients.green} name="notifications" size={22} library={MaterialIcons} />
       {unreadCount > 0 && (
-        <View style={styles(tokens, mode).badge}>
+        <LinearGradient 
+          colors={tokens.gradients.red} 
+          start={{ x: 0, y: 0 }} 
+          end={{ x: 1, y: 1 }} 
+          style={styles(tokens, mode).badge}
+        >
           <Text style={styles(tokens, mode).badgeText}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </Text>
-        </View>
+        </LinearGradient>
       )}
     </TouchableOpacity>
   );
@@ -48,7 +55,6 @@ const styles = (tokens: any, mode: string) => StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: '#ff4d4d',
     minWidth: 16,
     height: 16,
     borderRadius: 8,

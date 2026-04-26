@@ -6,7 +6,7 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@/hooks/ThemeContext';
 import { API_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
+import { GradientText, GradientIcon } from './GradientUI';
 
 export default function LikersModal({ visible, postId, onClose }: { visible: boolean, postId: string | null, onClose: () => void }) {
   const { tokens, mode } = useAppTheme();
@@ -33,43 +33,6 @@ export default function LikersModal({ visible, postId, onClose }: { visible: boo
     }
   };
 
-  function GradientIcon({ colors, name, size, library: IconLibrary }: any) {
-    if (Platform.OS === 'web') {
-      return <IconLibrary name={name} size={size} color={colors[0]} />;
-    }
-    return (
-      <MaskedView
-        maskElement={<IconLibrary name={name} size={size} color="white" />}
-      >
-        <LinearGradient
-          colors={colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-        >
-          <IconLibrary name={name} size={size} style={{ opacity: 0 }} />
-        </LinearGradient>
-      </MaskedView>
-    );
-  }
-
-  function GradientText({ colors, children, style }: any) {
-    if (Platform.OS === 'web') {
-      return <Text style={[style, { color: colors[0] }]}>{children}</Text>;
-    }
-    return (
-      <MaskedView
-        maskElement={<Text style={style}>{children}</Text>}
-      >
-        <LinearGradient
-          colors={colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <Text style={[style, { opacity: 0 }]}>{children}</Text>
-        </LinearGradient>
-      </MaskedView>
-    );
-  }
 
   const renderLiker = ({ item }: { item: any }) => (
     <TouchableOpacity 
@@ -84,20 +47,23 @@ export default function LikersModal({ visible, postId, onClose }: { visible: boo
         <Text style={[styles.name, { color: tokens.onSurface }]}>{item.fullName}</Text>
         <Text style={[styles.role, { color: tokens.onSurfaceVariant }]}>{item.role}</Text>
       </View>
-      <TouchableOpacity style={[styles.followBtn, { borderColor: tokens.primary + '40' }]}>
-        <GradientText colors={[tokens.primary, tokens.primaryFixed]} style={{ fontWeight: 'bold', fontSize: 12 }}>Profile</GradientText>
+      <TouchableOpacity style={[styles.followBtn, { borderColor: tokens.gradients.green[0] + '40' }]}>
+        <GradientText colors={tokens.gradients.green} style={{ fontWeight: 'bold', fontSize: 12 }}>Profile</GradientText>
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: '#0b1a13' }}>
+      <LinearGradient 
+        colors={[tokens.appBgGradientStart, tokens.appBgGradientMid, tokens.appBgGradientEnd]}
+        style={{ flex: 1 }}
+      >
         <SafeAreaView style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <GradientIcon colors={['#FF5252', '#D32F2F']} name="heart" size={24} library={Ionicons} />
+              <GradientIcon colors={tokens.gradients.red} name="heart" size={24} library={Ionicons} />
               <Text style={[styles.title, { color: tokens.onSurface }]}>Liked by</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -107,7 +73,7 @@ export default function LikersModal({ visible, postId, onClose }: { visible: boo
 
           {loading ? (
             <View style={styles.center}>
-              <ActivityIndicator size="large" color={tokens.primary} />
+              <ActivityIndicator size="large" color={tokens.gradients.green[0]} />
             </View>
           ) : likers.length === 0 ? (
             <View style={styles.center}>
@@ -122,7 +88,7 @@ export default function LikersModal({ visible, postId, onClose }: { visible: boo
             />
           )}
         </SafeAreaView>
-      </View>
+      </LinearGradient>
     </Modal>
   );
 }

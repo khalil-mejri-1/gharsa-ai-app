@@ -16,6 +16,7 @@ import { uploadToImgBB } from '@/utils/imageUpload';
 import ConnectionsModal from '@/components/ConnectionsModal';
 import UserPostsModal from '@/components/UserPostsModal';
 import CustomAvatar from '@/components/CustomAvatar';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 
 
 export default function ProfileScreen() {
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Edit states
   const [editName, setEditName] = useState('');
   const [editPlants, setEditPlants] = useState<string[]>([]);
@@ -41,7 +42,7 @@ export default function ProfileScreen() {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [postCount, setPostCount] = useState(0);
-  
+
   const [connModalVisible, setConnModalVisible] = useState(false);
   const [connType, setConnType] = useState<'followers' | 'following'>('followers');
   const [postsModalVisible, setPostsModalVisible] = useState(false);
@@ -78,7 +79,7 @@ export default function ProfileScreen() {
         setUser(data);
         setEditName(data.fullName);
         setEditPlants(data.plants || []);
-        
+
         // Check if current user is following
         const myId = await AsyncStorage.getItem('userId');
         if (data.followers?.includes(myId)) {
@@ -130,7 +131,7 @@ export default function ProfileScreen() {
     setIsUploading(true);
     try {
       let avatarUrl = user?.avatar;
-      
+
       // If a new avatar was picked, upload it first
       if (selectedAvatar) {
         const uploadedUrl = await uploadToImgBB(selectedAvatar);
@@ -152,17 +153,17 @@ export default function ProfileScreen() {
           avatar: avatarUrl
         })
       });
-      
+
       if (response.ok) {
         const updatedUser = await response.json();
         setUser(updatedUser);
-        
+
         // Also update local storage if it's my profile
         if (isOwnProfile) {
           await AsyncStorage.setItem('userName', updatedUser.fullName);
           await AsyncStorage.setItem('userAvatar', updatedUser.avatar);
         }
-        
+
         setIsEditing(false);
         setSelectedAvatar(null);
         Keyboard.dismiss();
@@ -189,26 +190,26 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="light-content" transparent />
-      
+
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={tokens.primary} />
+          <ActivityIndicator size="large" color={tokens.gradients.green[0]} />
           <Text style={{ marginTop: 20, color: tokens.onSurfaceVariant, fontSize: 16 }}>Loading Profile...</Text>
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header Background */}
           <View style={styles.headerCover}>
-            <Image 
-              source={require('../../assets/images/farm_cover_photo.png')}
+            <Image
+              source={require('../../assets/images/farm_cover_photo.jpg')}
               style={styles.coverImage}
               contentFit="cover"
             />
-            <LinearGradient 
-              colors={['transparent', 'rgba(0,0,0,0.8)']} 
-              style={StyleSheet.absoluteFillObject} 
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.8)']}
+              style={StyleSheet.absoluteFillObject}
             />
-            
+
             <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
               <View style={[styles.topAppBarInner, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
                 <Ionicons name="arrow-back" size={24} color="white" />
@@ -219,11 +220,11 @@ export default function ProfileScreen() {
           {/* Profile Content */}
           <View style={styles.profileCard}>
             <View style={styles.avatarWrapper}>
-              <CustomAvatar 
-                uri={user?.avatar} 
-                name={user?.fullName} 
-                size={120} 
-                style={[styles.avatar, { borderColor: tokens.background }]} 
+              <CustomAvatar
+                uri={user?.avatar}
+                name={user?.fullName}
+                size={120}
+                style={[styles.avatar, { borderColor: tokens.background }]}
               />
               <View style={styles.roleBadge}>
                 <MaterialIcons name={user?.role === 'agronomist' ? 'verified' : 'nature'} size={14} color="white" />
@@ -238,7 +239,7 @@ export default function ProfileScreen() {
 
             {/* Stats */}
             <View style={styles.statsRow}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.statItem}
                 onPress={() => {
                   setConnType('followers');
@@ -249,8 +250,8 @@ export default function ProfileScreen() {
                 <Text style={styles.statLab}>Followers</Text>
               </TouchableOpacity>
               <View style={styles.statDivider} />
-              <TouchableOpacity 
-                style={styles.statItem} 
+              <TouchableOpacity
+                style={styles.statItem}
                 onPress={() => {
                   setConnType('following');
                   setConnModalVisible(true);
@@ -259,7 +260,7 @@ export default function ProfileScreen() {
                 <Text style={styles.statVal}>{user?.following?.length || 0}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Text style={styles.statLab}>Following</Text>
-                  {isOwnProfile && <Ionicons name="people-circle" size={14} color={tokens.primary} />}
+                  {isOwnProfile && <GradientIcon colors={tokens.gradients.green} name="people-circle" size={14} library={Ionicons} />}
                 </View>
               </TouchableOpacity>
               <View style={styles.statDivider} />
@@ -273,20 +274,20 @@ export default function ProfileScreen() {
             <View style={styles.actionsRow}>
               {isOwnProfile ? (
                 <TouchableOpacity style={styles.editBtn} onPress={() => setIsEditing(true)}>
-                  <LinearGradient colors={[tokens.primary, '#66bb6a']} style={styles.btnGradient}>
+                  <LinearGradient colors={tokens.gradients.green} style={styles.btnGradient}>
                     <MaterialIcons name="edit" size={20} color="white" />
                     <Text style={styles.btnText}>Edit Profile</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               ) : (
                 <>
-                  <TouchableOpacity 
-                    style={styles.followBtn} 
+                  <TouchableOpacity
+                    style={styles.followBtn}
                     onPress={handleFollow}
                     disabled={isFollowLoading}
                   >
-                    <LinearGradient 
-                      colors={isFollowing ? ['#9e9e9e', '#757575'] : [tokens.primary, '#66bb6a']} 
+                    <LinearGradient
+                      colors={isFollowing ? tokens.gradients.gray : tokens.gradients.green}
                       style={styles.btnGradient}
                     >
                       {isFollowLoading ? (
@@ -301,17 +302,17 @@ export default function ProfileScreen() {
                       )}
                     </LinearGradient>
                   </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={styles.contactBtn} 
-                    onPress={() => router.push({ 
-                      pathname: `/chat/${id}`, 
-                      params: { targetUserName: user?.fullName, targetUserAvatar: user?.avatar } 
+
+                  <TouchableOpacity
+                    style={[styles.contactBtn, { borderColor: tokens.gradients.green[0] }]}
+                    onPress={() => router.push({
+                      pathname: `/chat/${id}`,
+                      params: { targetUserName: user?.fullName, targetUserAvatar: user?.avatar }
                     })}
                   >
                     <View style={styles.contactBtnInner}>
-                      <Ionicons name="chatbubble-ellipses" size={20} color={tokens.primary} />
-                      <Text style={[styles.btnText, { color: tokens.primary }]}>Contact</Text>
+                      <GradientIcon colors={tokens.gradients.green} name="chatbubble-ellipses" size={20} library={Ionicons} />
+                      <GradientText colors={tokens.gradients.green} style={styles.btnText}>Contact</GradientText>
                     </View>
                   </TouchableOpacity>
                 </>
@@ -321,17 +322,17 @@ export default function ProfileScreen() {
             {/* Plants Section */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <MaterialIcons name="local-florist" size={22} color={tokens.primary} />
+                <GradientIcon colors={tokens.gradients.green} name="local-florist" size={22} library={MaterialIcons} />
                 <Text style={styles.sectionTitle}>Plantations</Text>
               </View>
               <View style={styles.plantsGrid}>
                 {user?.plants?.length > 0 ? user.plants.map((plant: string, idx: number) => (
                   <View key={idx} style={styles.plantCard}>
-                    <LinearGradient 
-                      colors={['rgba(76, 175, 80, 0.1)', 'rgba(76, 175, 80, 0.05)']} 
+                    <LinearGradient
+                      colors={['rgba(76, 175, 80, 0.1)', 'rgba(76, 175, 80, 0.05)']}
                       style={styles.plantCardInner}
                     >
-                      <FontAwesome5 name="seedling" size={16} color={tokens.primary} />
+                      <GradientIcon colors={tokens.gradients.green} name="seedling" size={16} library={FontAwesome5} />
                       <Text style={styles.plantName}>{plant}</Text>
                     </LinearGradient>
                   </View>
@@ -356,8 +357,8 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
 
-              <ScrollView 
-                showsVerticalScrollIndicator={false} 
+              <ScrollView
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
                 keyboardShouldPersistTaps="handled"
               >
@@ -365,13 +366,13 @@ export default function ProfileScreen() {
                 <View style={{ alignSelf: 'center', marginVertical: 30 }}>
                   <TouchableOpacity onPress={pickAvatar} activeOpacity={0.8}>
                     <View style={styles.modalAvatarWrapper}>
-                      <CustomAvatar 
-                        uri={selectedAvatar || user?.avatar} 
-                        name={user?.fullName} 
-                        size={120} 
-                        style={[styles.avatar, { borderColor: tokens.primary }]} 
+                      <CustomAvatar
+                        uri={selectedAvatar || user?.avatar}
+                        name={user?.fullName}
+                        size={120}
+                        style={[styles.avatar, { borderColor: tokens.primary }]}
                       />
-                      <View style={[styles.roleBadge, { backgroundColor: tokens.primary, padding: 8 }]}>
+                      <View style={[styles.roleBadge, { backgroundColor: tokens.gradients.green[0], padding: 8 }]}>
                         <MaterialIcons name="camera-alt" size={16} color="white" />
                       </View>
                     </View>
@@ -382,46 +383,48 @@ export default function ProfileScreen() {
                 </View>
 
                 <Text style={styles.label}>Full Name</Text>
-                <TextInput 
-                  style={styles.modalInput} 
-                  value={editName} 
-                  onChangeText={setEditName} 
+                <TextInput
+                  style={styles.modalInput}
+                  value={editName}
+                  onChangeText={setEditName}
                   placeholder="Your Name"
                   placeholderTextColor={tokens.onSurfaceVariant}
                 />
 
                 <Text style={styles.label}>Your Plants</Text>
                 <View style={styles.modalInputRow}>
-                  <TextInput 
-                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]} 
-                    value={plantInput} 
+                  <TextInput
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    value={plantInput}
                     onChangeText={setPlantInput}
                     placeholder="Add a plant..."
                     placeholderTextColor={tokens.onSurfaceVariant}
                     onSubmitEditing={addPlant}
                   />
-                  <TouchableOpacity style={styles.addBtn} onPress={addPlant}>
-                    <MaterialIcons name="add" size={24} color="white" />
+                  <TouchableOpacity onPress={addPlant} style={{ borderRadius: 12, overflow: 'hidden' }}>
+                    <LinearGradient colors={tokens.gradients.green} style={styles.addBtn}>
+                      <MaterialIcons name="add" size={24} color="white" />
+                    </LinearGradient>
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.editPlantsList}>
                   {editPlants.map((p, idx) => (
-                    <View key={idx} style={styles.editPlantTag}>
+                    <LinearGradient key={idx} colors={tokens.gradients.green} style={styles.editPlantTag}>
                       <Text style={styles.editPlantText}>{p}</Text>
                       <TouchableOpacity onPress={() => setEditPlants(editPlants.filter(item => item !== p))}>
                         <MaterialIcons name="cancel" size={18} color="white" />
                       </TouchableOpacity>
-                    </View>
+                    </LinearGradient>
                   ))}
                 </View>
 
-                <TouchableOpacity 
-                  style={[styles.saveBtn, isUploading && { opacity: 0.7 }]} 
+                <TouchableOpacity
+                  style={[styles.saveBtn, isUploading && { opacity: 0.7 }]}
                   onPress={handleUpdateProfile}
                   disabled={isUploading}
                 >
-                  <LinearGradient colors={[tokens.primary, '#66bb6a']} style={styles.saveBtnGradient}>
+                  <LinearGradient colors={tokens.gradients.green} style={styles.saveBtnGradient}>
                     {isUploading ? (
                       <ActivityIndicator size="small" color="white" />
                     ) : (
@@ -434,17 +437,17 @@ export default function ProfileScreen() {
           </SafeAreaView>
         </View>
       </Modal>
-      <FollowingModal 
-        visible={followingModalVisible} 
-        onClose={() => setFollowingModalVisible(false)} 
+      <FollowingModal
+        visible={followingModalVisible}
+        onClose={() => setFollowingModalVisible(false)}
       />
-      <ConnectionsModal 
+      <ConnectionsModal
         visible={connModalVisible}
         onClose={() => setConnModalVisible(false)}
         userId={id as string}
         type={connType}
       />
-      <UserPostsModal 
+      <UserPostsModal
         visible={postsModalVisible}
         onClose={() => setPostsModalVisible(false)}
         userId={id as string}
@@ -706,9 +709,9 @@ function getStyles(tokens: any, mode: string) {
       marginBottom: 15,
     },
     addBtn: {
-      backgroundColor: tokens.primary,
       padding: 12,
-      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     editPlantsList: {
       flexDirection: 'row',
@@ -720,7 +723,6 @@ function getStyles(tokens: any, mode: string) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      backgroundColor: tokens.primary,
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 10,

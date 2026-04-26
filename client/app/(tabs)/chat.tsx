@@ -216,9 +216,12 @@ export default function AIChat() {
           >
             {/* AI Header Area */}
             <View style={styles.aiHeaderArea}>
-              <View style={styles.aiIconContainer}>
+              <LinearGradient 
+                colors={tokens.gradients.green}
+                style={styles.aiIconContainer}
+              >
                 <MaterialIcons name="smart-toy" size={40} color="white" />
-              </View>
+              </LinearGradient>
               <Text style={styles.aiHeaderTitle}>Agronomist AI</Text>
               <Text style={styles.aiHeaderSub}>Powered by GHARSA Intelligence</Text>
             </View>
@@ -227,15 +230,26 @@ export default function AIChat() {
             {messages.map((msg, index) => (
               <View key={msg.id || index.toString()} style={[styles.messageRow, msg.sender === 'user' ? styles.messageRowUser : styles.messageRowAI]}>
                 {msg.sender === 'ai' && (
-                  <View style={styles.msgAvatarAI}>
+                  <LinearGradient colors={tokens.gradients.green} style={styles.msgAvatarAI}>
                     <MaterialIcons name="smart-toy" size={16} color="white" />
+                  </LinearGradient>
+                )}
+                {msg.sender === 'user' ? (
+                  <LinearGradient 
+                    colors={tokens.gradients.green} 
+                    style={[styles.messageBubble, styles.messageBubbleUser]}
+                  >
+                    <Text style={[styles.messageText, styles.messageTextUser]}>
+                      {msg.text}
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={[styles.messageBubble, styles.messageBubbleAI]}>
+                    <Text style={[styles.messageText, styles.messageTextAI]}>
+                      {msg.text}
+                    </Text>
                   </View>
                 )}
-                <View style={[styles.messageBubble, msg.sender === 'user' ? styles.messageBubbleUser : styles.messageBubbleAI]}>
-                  <Text style={[styles.messageText, msg.sender === 'user' ? styles.messageTextUser : styles.messageTextAI]}>
-                    {msg.text}
-                  </Text>
-                </View>
               </View>
             ))}
           </ScrollView>
@@ -252,7 +266,7 @@ export default function AIChat() {
             />
             <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={isSending}>
               <LinearGradient
-                colors={[tokens.primary, tokens.primaryContainer]}
+                colors={tokens.gradients.green}
                 style={styles.sendButtonGradient}
               >
                 {isSending ? (
@@ -283,7 +297,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         <LinearGradient
-          colors={[tokens.primaryContainer, tokens.primary]}
+          colors={tokens.gradients.green}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.langBtnActive}
@@ -317,7 +331,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: 70,
     zIndex: 100,
     borderRadius: 35,
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -329,7 +343,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     overflow: 'hidden',
     paddingHorizontal: 16,
     borderWidth: 1.5,
-    borderColor: tokens.primary + '30',
+    borderColor: tokens.gradients.green[0] + '40',
   },
   topAppBarContent: {
     flexDirection: 'row',
@@ -415,10 +429,9 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: tokens.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
@@ -452,7 +465,6 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: tokens.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
@@ -464,7 +476,6 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     borderRadius: 20,
   },
   messageBubbleUser: {
-    backgroundColor: tokens.primary,
     borderBottomRightRadius: 4,
   },
   messageBubbleAI: {

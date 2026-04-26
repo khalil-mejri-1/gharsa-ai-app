@@ -13,6 +13,8 @@ export default function LandingPage() {
   const { tokens, mode } = useAppTheme();
   const { language, setLanguage, t } = useLanguage();
 
+  const styles = getStyles(tokens);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -81,7 +83,7 @@ export default function LandingPage() {
               onPress={() => Linking.openURL('https://gharsa-ai.web.app/register')}
             >
               <LinearGradient
-                colors={[tokens.primaryFixed, tokens.primaryContainer]}
+                colors={tokens.gradients.green}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.buttonGradient}
@@ -115,7 +117,7 @@ export default function LandingPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (tokens: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
     height: 58,
     borderRadius: 29,
     overflow: 'hidden',
-    shadowColor: '#10c22e',
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 15,

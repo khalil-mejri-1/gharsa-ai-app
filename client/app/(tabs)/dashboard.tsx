@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import NotificationBell from '@/components/NotificationBell';
 import CustomAvatar from '@/components/CustomAvatar';
 import { SkeletonCircle, SkeletonRect } from '@/components/Skeleton';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 
 export default function Dashboard() {
   const { mode, tokens } = useAppTheme();
@@ -96,19 +97,19 @@ export default function Dashboard() {
         <View style={styles.topAppBarWrapper}>
           <View style={[styles.topAppBarInner, { backgroundColor: tokens.surfaceContainerLowest }]}>
             <View style={styles.topAppBarContent}>
-              <TouchableOpacity 
-                style={styles.userInfo} 
+              <TouchableOpacity
+                style={styles.userInfo}
                 onPress={() => userId && router.push(`/profile/${userId}`)}
               >
                 <View style={styles.avatarContainer}>
                   {userLoading ? (
                     <SkeletonCircle size={40} style={styles.avatar} />
                   ) : (
-                    <CustomAvatar 
-                      uri={userAvatar} 
-                      name={userName} 
-                      size={40} 
-                      style={styles.avatar} 
+                    <CustomAvatar
+                      uri={userAvatar}
+                      name={userName}
+                      size={40}
+                      style={styles.avatar}
                     />
                   )}
                 </View>
@@ -143,7 +144,7 @@ export default function Dashboard() {
           {/* --- Hero: Weather & Status --- */}
           <View style={styles.heroSection}>
             <Image
-              source={require('@/assets/images/dashboard_hero.png')}
+              source={require('@/assets/images/dashboard_hero.jpg')}
               style={styles.heroImage}
               contentFit="cover"
             />
@@ -203,12 +204,12 @@ export default function Dashboard() {
                   <View style={styles.gaugeContainer}>
                     <View style={styles.gaugeOuter}>
                       <LinearGradient
-                        colors={[tokens.primary + '20', tokens.secondary + '10']}
+                        colors={[tokens.gradients.green[0] + '20', tokens.gradients.green[1] + '10']}
                         style={StyleSheet.absoluteFill}
                       />
                       <View style={[styles.gaugeFill, { height: '68%' }]}>
                         <LinearGradient
-                          colors={[tokens.secondary, tokens.secondaryFixed]}
+                          colors={tokens.gradients.green}
                           style={StyleSheet.absoluteFill}
                         />
                         <View style={styles.waveEffect} />
@@ -222,21 +223,21 @@ export default function Dashboard() {
                   </View>
 
                   <View style={styles.quickGrid}>
-                    <DetailPill icon="thermostat" label={t('temperature')} value="23°C" color="#ff7043" />
-                    <DetailPill icon="science" label={t('phLevel')} value="6.5" color="#7e57c2" />
-                    <DetailPill icon="wb-sunny" label={t('illuminance')} value="1.2k" color="#fbc02d" />
+                    <DetailPill icon="thermostat" label={t('temperature')} value="23°C" colors={tokens.gradients.orange} />
+                    <DetailPill icon="science" label={t('phLevel')} value="6.5" colors={tokens.gradients.blue} />
+                    <DetailPill icon="wb-sunny" label={t('illuminance')} value="1.2k" colors={tokens.gradients.orange} />
                   </View>
                 </View>
 
                 {/* NPK Satellite Grid */}
                 <View style={styles.npkSatelliteGrid}>
-                  <NPKSatellite label={t('nitrogen')} value="124" trend="up" color="#43a047" />
-                  <NPKSatellite label={t('phosphorus')} value="45" trend="down" color="#1e88e5" />
-                  <NPKSatellite label={t('potassium')} value="210" trend="stable" color="#fb8c00" />
+                  <NPKSatellite label={t('nitrogen')} value="124" trend="up" colors={tokens.gradients.green} />
+                  <NPKSatellite label={t('phosphorus')} value="45" trend="down" colors={tokens.gradients.blue} />
+                  <NPKSatellite label={t('potassium')} value="210" trend="stable" colors={tokens.gradients.orange} />
                 </View>
 
                 <View style={styles.cardFooter}>
-                  <Ionicons name="shield-checkmark" size={16} color={tokens.primary} />
+                  <MaterialIcons name="shield" size={16} color={tokens.gradients.green[0]} />
                   <Text style={styles.footerNote}>{t('conditionsStable')}</Text>
                 </View>
               </LinearGradient>
@@ -245,7 +246,7 @@ export default function Dashboard() {
 
           {/* --- AI Recommendations --- */}
           <LinearGradient
-            colors={[tokens.primary, tokens.primaryContainer]}
+            colors={tokens.gradients.green}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.aiBanner}
@@ -268,10 +269,10 @@ export default function Dashboard() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.toolsScroll}>
-            <ToolCard icon="water" label={t('irrigation')} color={tokens.secondary} />
-            <ToolCard icon="pest-control" label={t('pestScan')} color={tokens.tertiary} />
-            <ToolCard icon="wb-sunny" label={t('lighting')} color="#fbc02d" />
-            <ToolCard icon="opacity" label={t('fertilize')} color="#795548" />
+            <ToolCard icon="water" label={t('irrigation')} colors={tokens.gradients.green} />
+            <ToolCard icon="pest-control" label={t('pestScan')} colors={tokens.gradients.red} />
+            <ToolCard icon="wb-sunny" label={t('lighting')} colors={tokens.gradients.orange} />
+            <ToolCard icon="opacity" label={t('fertilize')} colors={tokens.gradients.blue} />
           </ScrollView>
 
           <View style={{ height: 100 }} />
@@ -290,7 +291,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         <LinearGradient
-          colors={[tokens.primaryContainer, tokens.primary]}
+          colors={tokens.gradients.green}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.langBtnActive}
@@ -313,13 +314,13 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
   );
 }
 
-function DetailPill({ icon, label, value, color }: any) {
+function DetailPill({ icon, label, value, colors }: any) {
   const { tokens, mode } = useAppTheme();
   const styles = getStyles(tokens, mode);
   return (
     <View style={styles.detailPill}>
-      <View style={[styles.pillIconBox, { backgroundColor: color + '15' }]}>
-        <MaterialIcons name={icon} size={20} color={color} />
+      <View style={[styles.pillIconBox, { backgroundColor: colors[0] + '15' }]}>
+        <GradientIcon colors={colors} name={icon} size={20} library={MaterialIcons} />
       </View>
       <View>
         <Text style={styles.pillLabel}>{label}</Text>
@@ -329,7 +330,7 @@ function DetailPill({ icon, label, value, color }: any) {
   )
 }
 
-function NPKSatellite({ label, value, color, trend }: any) {
+function NPKSatellite({ label, value, colors, trend }: any) {
   const { tokens, mode } = useAppTheme();
   const styles = getStyles(tokens, mode);
   return (
@@ -338,15 +339,16 @@ function NPKSatellite({ label, value, color, trend }: any) {
         colors={[mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)', 'transparent']}
         style={styles.npkCardInner}
       >
-        <View style={[styles.satLabelBox, { borderColor: color, backgroundColor: color + '10' }]}>
-          <Text style={[styles.satLabel, { color }]}>{label}</Text>
+        <View style={[styles.satLabelBox, { borderColor: colors[0], backgroundColor: colors[0] + '10' }]}>
+          <GradientText colors={colors} style={styles.satLabel}>{label}</GradientText>
         </View>
         <View style={styles.satContentLarge}>
           <Text style={styles.satValueLarge}>{value}</Text>
-          <MaterialIcons
+          <GradientIcon
+            colors={trend === 'up' ? tokens.gradients.green : trend === 'down' ? tokens.gradients.red : tokens.gradients.gray}
             name={trend === 'up' ? 'trending-up' : trend === 'down' ? 'trending-down' : 'trending-flat'}
             size={20}
-            color={trend === 'up' ? '#4caf50' : trend === 'down' ? '#f44336' : tokens.outline}
+            library={MaterialIcons}
           />
         </View>
       </LinearGradient>
@@ -354,14 +356,14 @@ function NPKSatellite({ label, value, color, trend }: any) {
   )
 }
 
-function ToolCard({ icon, label, color }: { icon: any, label: string, color: string }) {
+function ToolCard({ icon, label, colors }: { icon: any, label: string, colors: string[] }) {
   const { tokens, mode } = useAppTheme();
   const styles = getStyles(tokens, mode);
   return (
     <TouchableOpacity style={styles.toolCardContainer}>
       <LinearGradient colors={[tokens.surfaceContainerLowest, tokens.surface]} style={styles.toolCard}>
         <View style={styles.toolIconCircle}>
-          <MaterialIcons name={icon} size={24} color={color} />
+          <GradientIcon colors={colors} name={icon} size={24} library={MaterialIcons} />
         </View>
         <Text style={styles.toolLabel}>{label}</Text>
       </LinearGradient>
@@ -380,7 +382,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: 70,
     zIndex: 100,
     borderRadius: 35,
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -392,7 +394,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     overflow: 'hidden',
     paddingHorizontal: 16,
     borderWidth: 1.5,
-    borderColor: tokens.primary + '30',
+    borderColor: tokens.gradients.green[0] + '40',
   },
   topAppBarContent: {
     flexDirection: 'row',
@@ -578,7 +580,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: tokens.primary + '10',
+    backgroundColor: tokens.gradients.green[0] + '15',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
@@ -586,14 +588,14 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
   liveLabel: {
     fontSize: 10,
     fontWeight: '800',
-    color: tokens.primary,
+    color: tokens.gradients.green[0],
     letterSpacing: 1,
   },
   pulseDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: tokens.primary,
+    backgroundColor: tokens.gradients.green[0],
   },
   glassSensorCard: {
     borderRadius: 32,
@@ -844,7 +846,7 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     elevation: 10,
     shadowColor: tokens.primary,
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3, 
+    shadowOpacity: 0.3,
     shadowRadius: 20,
   },
   fabGradient: {

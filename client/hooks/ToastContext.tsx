@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { Animated, StyleSheet, View, Text, SafeAreaView, Dimensions, Platform, Modal, TouchableOpacity } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from './ThemeContext';
+import { GradientIcon } from '../components/GradientUI';
 
 const { width } = Dimensions.get('window');
 
@@ -63,12 +65,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getBackgroundColor = () => {
+  const getGradientColors = () => {
     switch (type) {
-      case 'success': return '#43A047';
-      case 'error': return '#E53935';
-      case 'warning': return '#FB8C00';
-      default: return '#1E88E5';
+      case 'success': return tokens.gradients.green;
+      case 'error': return tokens.gradients.red;
+      case 'warning': return tokens.gradients.orange || ['#FB8C00', '#F57C00'];
+      default: return ['#42A5F5', '#1E88E5'];
     }
   };
 
@@ -78,24 +80,30 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       
       {/* Toast Notification */}
       <Animated.View style={[
-        styles.toastContainer, 
+        styles.toastContainerWrapper, 
         { 
           transform: [{ translateY: slideAnim }], 
-          backgroundColor: getBackgroundColor(),
           display: visible ? 'flex' : 'none'
         }
       ]}>
-        <SafeAreaView>
-          <View style={styles.toastContent}>
-            <View style={styles.iconCircle}>
-              <MaterialIcons name={getIcon()} size={20} color={getBackgroundColor()} />
+        <LinearGradient 
+          colors={getGradientColors()} 
+          start={{ x: 0, y: 0 }} 
+          end={{ x: 1, y: 1 }}
+          style={styles.toastContainer}
+        >
+          <SafeAreaView>
+            <View style={styles.toastContent}>
+              <View style={styles.iconCircle}>
+                <MaterialIcons name={getIcon()} size={20} color={getGradientColors()[0]} />
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={styles.toastTitle}>{type.toUpperCase()}</Text>
+                <Text style={styles.toastText}>{message}</Text>
+              </View>
             </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.toastTitle}>{type.toUpperCase()}</Text>
-              <Text style={styles.toastText}>{message}</Text>
-            </View>
-          </View>
-        </SafeAreaView>
+          </SafeAreaView>
+        </LinearGradient>
       </Animated.View>
 
       {/* Confirmation Modal */}
@@ -103,8 +111,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         <View style={styles.modalOverlay}>
           <View style={[styles.confirmCard, { backgroundColor: mode === 'dark' ? '#1a2e24' : '#ffffff' }]}>
             <View style={styles.confirmHeader}>
-              <View style={[styles.confirmIconBg, { backgroundColor: '#ff4d4d20' }]}>
-                <Ionicons name="alert-circle" size={32} color="#ff4d4d" />
+              <View style={[styles.confirmIconBg, { backgroundColor: tokens.gradients.red[0] + '20' }]}>
+                <GradientIcon colors={tokens.gradients.red} name="alert-circle" size={32} library={Ionicons} />
               </View>
               <Text style={[styles.confirmTitle, { color: tokens.onSurface }]}>{confirmTitle}</Text>
               <Text style={[styles.confirmMsg, { color: tokens.onSurfaceVariant }]}>{confirmMessage}</Text>
@@ -117,13 +125,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <Text style={[styles.btnCancelText, { color: tokens.onSurface }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={styles.btnConfirm} 
+                style={styles.btnConfirmContainer} 
                 onPress={() => {
                   onConfirmAction();
                   setConfirmVisible(false);
                 }}
               >
-                <Text style={styles.btnConfirmText}>Confirm</Text>
+                <LinearGradient
+                  colors={tokens.gradients.red}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.btnConfirm}
+                >
+                  <Text style={styles.btnConfirmText}>Confirm</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -140,13 +155,15 @@ export const useToast = () => {
 };
 
 const styles = StyleSheet.create({
-  toastContainer: {
+  toastContainerWrapper: {
     position: 'absolute',
     top: 0,
     left: 20,
     right: 20,
-    borderRadius: 20,
     zIndex: 99999,
+  },
+  toastContainer: {
+    borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 12,
     shadowColor: '#000',
@@ -245,17 +262,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
   },
-  btnConfirm: {
+  btnConfirmContainer: {
     flex: 1,
     height: 54,
     borderRadius: 18,
-    backgroundColor: '#ff4d4d',
-    justifyContent: 'center',
-    alignItems: 'center',
     shadowColor: '#ff4d4d',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    overflow: 'hidden',
+  },
+  btnConfirm: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   btnConfirmText: {
     color: 'white',

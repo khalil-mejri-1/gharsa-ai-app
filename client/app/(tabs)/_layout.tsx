@@ -5,7 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { View, TouchableOpacity, StyleSheet, DeviceEventEmitter } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, DeviceEventEmitter, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { AppThemeProvider, useAppTheme } from '@/hooks/ThemeContext';
@@ -13,6 +13,7 @@ import NotificationModal from '@/components/NotificationModal';
 import FollowingModal from '@/components/FollowingModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 
 
 
@@ -77,7 +78,7 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: tokens.primary,
+          tabBarActiveTintColor: tokens.gradients.green[0],
           tabBarInactiveTintColor: tokens.outline,
           headerShown: false,
           tabBarHideOnKeyboard: true, // Hide tab bar when keyboard is open
@@ -85,24 +86,32 @@ export default function TabLayout() {
           // Showing the tab bar now that we have a dashboard and real app structure
           tabBarStyle: {
             backgroundColor: tokens.surfaceContainerLowest,
-            borderTopLeftRadius: 32,
-            borderTopRightRadius: 32,
-            height: 85,
-            position: 'absolute',
+            height: 105,
             borderTopWidth: 0,
             elevation: 20,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -10 },
             shadowOpacity: mode === 'dark' ? 0.3 : 0.05,
             shadowRadius: 20,
-            paddingBottom: 25,
+            paddingBottom: 40,
           }
         }}>
         <Tabs.Screen
           name="dashboard"
           options={{
             title: 'HOME',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+            tabBarIcon: ({ color, focused }) => 
+              focused ? (
+                <GradientIcon colors={tokens.gradients.green} name="home" size={28} library={MaterialIcons} />
+              ) : (
+                <MaterialIcons name="home" size={28} color={color} />
+              ),
+            tabBarLabel: ({ color, focused }) => 
+              focused ? (
+                <GradientText colors={tokens.gradients.green} style={{ fontSize: 10, fontWeight: '600' }}>HOME</GradientText>
+              ) : (
+                <Text style={{ fontSize: 10, color, fontWeight: '600' }}>HOME</Text>
+              ),
           }}
         />
         <Tabs.Screen
@@ -114,25 +123,58 @@ export default function TabLayout() {
           }}
           options={{
             title: 'COMMUNITY',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />,
+            tabBarIcon: ({ color, focused }) => 
+              focused ? (
+                <GradientIcon colors={tokens.gradients.green} name="forum" size={28} library={MaterialIcons} />
+              ) : (
+                <MaterialIcons name="forum" size={28} color={color} />
+              ),
+            tabBarLabel: ({ color, focused }) => 
+              focused ? (
+                <GradientText colors={tokens.gradients.green} style={{ fontSize: 10, fontWeight: '600' }}>COMMUNITY</GradientText>
+              ) : (
+                <Text style={{ fontSize: 10, color, fontWeight: '600' }}>COMMUNITY</Text>
+              ),
             tabBarBadge: newPostsCount > 0 ? newPostsCount : undefined,
-            tabBarBadgeStyle: { backgroundColor: tokens.primary },
+            tabBarBadgeStyle: { backgroundColor: tokens.gradients.green[0] },
           }}
         />
         <Tabs.Screen
           name="messages"
           options={{
             title: 'MESSAGES',
-            tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-sharp" size={24} color={color} />,
+            tabBarIcon: ({ color, focused }) => 
+              focused ? (
+                <GradientIcon colors={tokens.gradients.green} name="chatbubbles" size={24} library={Ionicons} />
+              ) : (
+                <Ionicons name="chatbubbles" size={24} color={color} />
+              ),
+            tabBarLabel: ({ color, focused }) => 
+              focused ? (
+                <GradientText colors={tokens.gradients.green} style={{ fontSize: 10, fontWeight: '600' }}>MESSAGES</GradientText>
+              ) : (
+                <Text style={{ fontSize: 10, color, fontWeight: '600' }}>MESSAGES</Text>
+              ),
             tabBarBadge: unreadMessages > 0 ? unreadMessages : undefined,
-            tabBarBadgeStyle: { backgroundColor: '#ff5252' },
+            tabBarBadgeStyle: { backgroundColor: tokens.gradients.red[0] },
           }}
         />
         <Tabs.Screen
           name="aiscan"
           options={{
             title: 'AI SCAN',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="brain.filled.head.profile" color={color} />,
+            tabBarIcon: ({ color, focused }) => 
+              focused ? (
+                <GradientIcon colors={tokens.gradients.green} name="psychology" size={28} library={MaterialIcons} />
+              ) : (
+                <MaterialIcons name="psychology" size={28} color={color} />
+              ),
+            tabBarLabel: ({ color, focused }) => 
+              focused ? (
+                <GradientText colors={tokens.gradients.green} style={{ fontSize: 10, fontWeight: '600' }}>AI SCAN</GradientText>
+              ) : (
+                <Text style={{ fontSize: 10, color, fontWeight: '600' }}>AI SCAN</Text>
+              ),
           }}
         />
         <Tabs.Screen
@@ -145,7 +187,18 @@ export default function TabLayout() {
           }}
           options={{
             title: 'THEME',
-            tabBarIcon: ({ color }) => <MaterialIcons name={mode === 'dark' ? "wb-sunny" : "brightness-4"} size={28} color={color} />,
+            tabBarIcon: ({ color, focused }) => 
+              focused ? (
+                <GradientIcon colors={tokens.gradients.green} name={mode === 'dark' ? "wb-sunny" : "brightness-4"} size={28} library={MaterialIcons} />
+              ) : (
+                <MaterialIcons name={mode === 'dark' ? "wb-sunny" : "brightness-4"} size={28} color={color} />
+              ),
+            tabBarLabel: ({ color, focused }) => 
+              focused ? (
+                <GradientText colors={tokens.gradients.green} style={{ fontSize: 10, fontWeight: '600' }}>THEME</GradientText>
+              ) : (
+                <Text style={{ fontSize: 10, color, fontWeight: '600' }}>THEME</Text>
+              ),
           }}
         />
         <Tabs.Screen
@@ -170,7 +223,7 @@ export default function TabLayout() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={[tokens.primary, tokens.tertiary]}
+            colors={tokens.gradients.green}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles(tokens).fabGradient}
@@ -188,13 +241,13 @@ export default function TabLayout() {
 const styles = (tokens: any) => StyleSheet.create({
   fab: {
     position: 'absolute',
-    bottom: 120, // Sit above the tab bar
+    bottom: 135, // Sit above the taller tab bar with a comfortable gap
     right: 16,
     width: 64,
     height: 64,
     borderRadius: 32,
     elevation: 10,
-    shadowColor: tokens.primary,
+    shadowColor: tokens.gradients.green[0],
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,

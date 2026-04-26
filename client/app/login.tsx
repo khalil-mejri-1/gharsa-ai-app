@@ -11,6 +11,7 @@ import { useLanguage } from '@/hooks/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { API_URL } from '@/constants/config';
+import { GradientText, GradientIcon } from '../components/GradientUI';
 
 // GoogleSignin.configure({
 //   webClientId: '1009149258614-7pmjbda89uuh3n7ii4m2r19tit3i3kng.apps.googleusercontent.com',
@@ -148,10 +149,10 @@ export default function LoginPage() {
                 <LangBtn active={language === 'FR'} label="FR" onPress={() => setLanguage('FR')} />
               </View>
               <TouchableOpacity style={styles.iconBtn}>
-                <MaterialIcons name="notifications" size={22} color={tokens.primary} />
+                <GradientIcon colors={tokens.gradients.green} name="notifications" size={22} library={MaterialIcons} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconBtn} onPress={() => router.push('/')}>
-                <MaterialIcons name="home" size={24} color={tokens.primary} />
+                <GradientIcon colors={tokens.gradients.green} name="home" size={24} library={MaterialIcons} />
               </TouchableOpacity>
             </View>
           </View>
@@ -184,9 +185,9 @@ export default function LoginPage() {
 
           {/* Error Message */}
           {error && (
-            <View style={styles.errorBox}>
-              <MaterialIcons name="error-outline" size={20} color="#ff4d4d" />
-              <Text style={styles.errorText}>{error}</Text>
+            <View style={[styles.errorBox, { borderColor: tokens.gradients.red[0] + '30', backgroundColor: mode === 'dark' ? 'rgba(255, 77, 77, 0.1)' : '#fff0f0' }]}>
+              <GradientIcon colors={tokens.gradients.red} name="error-outline" size={20} library={MaterialIcons} />
+              <Text style={[styles.errorText, { color: tokens.gradients.red[0] }]}>{error}</Text>
             </View>
           )}
         </View>
@@ -194,7 +195,7 @@ export default function LoginPage() {
         {/* Form Section */}
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('email')}</Text>
+            <GradientText colors={tokens.gradients.green} style={styles.label}>{t('email')}</GradientText>
             <View style={styles.inputWrapper}>
               <TextInput
                 placeholder="agronomist@farm.ai"
@@ -210,7 +211,7 @@ export default function LoginPage() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('password')}</Text>
+            <GradientText colors={tokens.gradients.green} style={styles.label}>{t('password')}</GradientText>
             <View style={styles.inputWrapper}>
               <TextInput
                 placeholder="••••••••"
@@ -225,7 +226,7 @@ export default function LoginPage() {
           </View>
 
           <TouchableOpacity style={styles.forgotBtn}>
-            <Text style={styles.forgotText}>{t('forgotPassword')}</Text>
+            <GradientText colors={tokens.gradients.green} style={styles.forgotText}>{t('forgotPassword')}</GradientText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -235,7 +236,7 @@ export default function LoginPage() {
             disabled={loading}
           >
             <LinearGradient
-              colors={[tokens.primary, tokens.primaryContainer]}
+              colors={tokens.gradients.green}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.loginBtn}
@@ -277,8 +278,8 @@ export default function LoginPage() {
           <TouchableOpacity onPress={() => Linking.openURL('https://gharsa-ai.web.app/register')} activeOpacity={0.7}>
             <Text style={styles.footerText}>
               {t('noAccount')}
-              <Text style={styles.footerLink}> {t('signUp')}</Text>
             </Text>
+            <GradientText colors={tokens.gradients.green} style={styles.footerLink}> {t('signUp')}</GradientText>
           </TouchableOpacity>
 
           <View style={styles.statusRow}>
@@ -306,7 +307,7 @@ function LangBtn({ active, label, onPress }: { active: boolean, label: string, o
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         <LinearGradient
-          colors={[tokens.primaryContainer, tokens.primary]}
+          colors={tokens.gradients.green}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.langBtnActive}

@@ -15,6 +15,7 @@ import { uploadToImgBB } from '@/utils/imageUpload';
 import VoiceMessage from '@/components/VoiceMessage';
 import { useToast } from '@/hooks/ToastContext';
 import CustomAvatar from '@/components/CustomAvatar';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 
 
 export default function DirectMessageScreen() {
@@ -328,13 +329,13 @@ export default function DirectMessageScreen() {
             />
             <View>
               <Text style={styles.userName}>{targetUserName}</Text>
-              <Text style={styles.status}>Online</Text>
+              <GradientText colors={tokens.gradients.green} style={styles.status}>Online</GradientText>
             </View>
           </TouchableOpacity>
 
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionIcon} onPress={handleDeleteAll}>
-              <MaterialIcons name="delete-sweep" size={26} color="#ff5252" />
+              <GradientIcon colors={tokens.gradients.red} name="delete-sweep" size={26} library={MaterialIcons} />
             </TouchableOpacity>
           </View>
         </View>
@@ -346,7 +347,7 @@ export default function DirectMessageScreen() {
         >
           {loading ? (
             <View style={{ flex: 1, justifyContent: 'center' }}>
-              <ActivityIndicator size="large" color={tokens.primary} />
+              <ActivityIndicator size="large" color={tokens.gradients.green[0]} />
             </View>
           ) : (
             <ScrollView
@@ -367,21 +368,44 @@ export default function DirectMessageScreen() {
                     const isMe = msg.senderId === currentUserId;
                     return (
                       <View key={msg._id} style={[styles.msgWrapper, isMe ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }]}>
-                        <View style={[
-                          styles.messageBubble,
-                          isMe ? styles.myMessage : styles.otherMessage,
-                          msg.type === 'image' && { paddingHorizontal: 4, paddingVertical: 4 }
-                        ]}>
-                          {msg.type === 'image' && <Image source={{ uri: msg.mediaUrl }} style={[styles.msgMedia, { marginVertical: 0 }]} />}
-                          {msg.type === 'audio' && (
-                            <VoiceMessage uri={msg.mediaUrl} isMe={isMe} tokens={tokens} passedDuration={(msg as any).duration} />
-                          )}
-                          {msg.type === 'text' && (
-                            <Text style={[styles.messageText, { color: isMe ? 'white' : tokens.onSurface }]}>
-                              {msg.text}
-                            </Text>
-                          )}
-                        </View>
+                        {isMe ? (
+                          <LinearGradient
+                            colors={tokens.gradients.green}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[
+                              styles.messageBubble,
+                              styles.myMessage,
+                              msg.type === 'image' && { paddingHorizontal: 4, paddingVertical: 4 }
+                            ]}
+                          >
+                            {msg.type === 'image' && <Image source={{ uri: msg.mediaUrl }} style={[styles.msgMedia, { marginVertical: 0 }]} />}
+                            {msg.type === 'audio' && (
+                              <VoiceMessage uri={msg.mediaUrl} isMe={isMe} tokens={tokens} passedDuration={(msg as any).duration} />
+                            )}
+                            {msg.type === 'text' && (
+                              <Text style={[styles.messageText, { color: 'white' }]}>
+                                {msg.text}
+                              </Text>
+                            )}
+                          </LinearGradient>
+                        ) : (
+                          <View style={[
+                            styles.messageBubble,
+                            styles.otherMessage,
+                            msg.type === 'image' && { paddingHorizontal: 4, paddingVertical: 4 }
+                          ]}>
+                            {msg.type === 'image' && <Image source={{ uri: msg.mediaUrl }} style={[styles.msgMedia, { marginVertical: 0 }]} />}
+                            {msg.type === 'audio' && (
+                              <VoiceMessage uri={msg.mediaUrl} isMe={isMe} tokens={tokens} passedDuration={(msg as any).duration} />
+                            )}
+                            {msg.type === 'text' && (
+                              <Text style={[styles.messageText, { color: tokens.onSurface }]}>
+                                {msg.text}
+                              </Text>
+                            )}
+                          </View>
+                        )}
                         <Text style={styles.msgTime}>{formatTime(msg.createdAt)}</Text>
                       </View>
                     );
@@ -432,21 +456,21 @@ export default function DirectMessageScreen() {
             <View style={[styles.inputBlur, { backgroundColor: mode === 'dark' ? '#0A2013' : '#E8F5E9', borderColor: mode === 'dark' ? '#113A22' : '#C8E6C9' }]}>
               {isRecording ? (
                 <TouchableOpacity style={styles.cancelBtn} onPress={cancelRecording}>
-                  <Ionicons name="close-circle" size={32} color="#ff5252" />
+                  <GradientIcon colors={tokens.gradients.red} name="close-circle" size={32} library={Ionicons} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity 
-                  style={[styles.attachBtn, { borderColor: tokens.primary }]} 
+                  style={[styles.attachBtn, { borderColor: tokens.gradients.green[0] + '60' }]} 
                   onPress={togglePlusMenu}
                 >
-                  <Ionicons name="add" size={22} color={tokens.primary} />
+                  <GradientIcon colors={tokens.gradients.green} name="add" size={22} library={Ionicons} />
                 </TouchableOpacity>
               )}
 
               {isRecording ? (
                 <View style={[styles.input, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
-                  <MaterialIcons name="mic" size={24} color="#ff5252" style={{ marginRight: 8 }} />
-                  <Text style={{ color: '#ff5252', fontWeight: 'bold', fontSize: 16 }}>Recording...</Text>
+                  <GradientIcon colors={tokens.gradients.red} name="mic" size={24} library={MaterialIcons} />
+                  <GradientText colors={tokens.gradients.red} style={{ fontWeight: 'bold', fontSize: 16, marginLeft: 8 }}>Recording...</GradientText>
                 </View>
               ) : (
                 <TextInput
@@ -461,15 +485,22 @@ export default function DirectMessageScreen() {
               )}
 
               <TouchableOpacity
-                style={[styles.sendBtn, { backgroundColor: tokens.primary, opacity: (message.trim() || isRecording || isSending) ? 1 : 0.5 }]}
+                style={[styles.sendBtn, { opacity: (message.trim() || isRecording || isSending) ? 1 : 0.5, overflow: 'hidden' }]}
                 onPress={() => isRecording ? stopRecording() : handleSend('text')}
                 disabled={(!message.trim() && !isRecording) || isSending}
               >
-                {isSending ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <Ionicons name="send" size={20} color="white" />
-                )}
+                <LinearGradient
+                  colors={tokens.gradients.green}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[StyleSheet.absoluteFill, { justifyContent: 'center', alignItems: 'center' }]}
+                >
+                  {isSending ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <Ionicons name="send" size={20} color="white" />
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -539,7 +570,6 @@ const getStyles = (tokens: any, mode: string, isKeyboardVisible: boolean) => Sty
     borderRadius: 22,
   },
   myMessage: {
-    backgroundColor: tokens.primary,
     borderBottomRightRadius: 4,
   },
   otherMessage: {
