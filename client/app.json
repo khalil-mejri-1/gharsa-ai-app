@@ -4,7 +4,7 @@
     "slug": "agro",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/logo_gharsa.png",
+    "icon": "./assets/images/logo.jpg",
     "scheme": "agro",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -17,7 +17,7 @@
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/logo_gharsa.png",
+        "foregroundImage": "./assets/images/logo.jpg",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
