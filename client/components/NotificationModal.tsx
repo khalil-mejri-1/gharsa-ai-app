@@ -11,6 +11,7 @@ import { API_URL, SOCKET_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Platform } from 'react-native';
 import { GradientText, GradientIcon } from './GradientUI';
+import CustomAvatar from './CustomAvatar';
 
 
 export default function NotificationModal() {
@@ -207,8 +208,10 @@ export default function NotificationModal() {
       ]}
     >
       <View style={styles.avatarWrapper}>
-        <Image 
-          source={{ uri: item.senderAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop' }} 
+        <CustomAvatar 
+          uri={item.senderAvatar} 
+          name={item.senderName} 
+          size={48} 
           style={styles.senderAvatar} 
         />
         <LinearGradient 

@@ -7,6 +7,7 @@ import { useAppTheme } from '@/hooks/ThemeContext';
 import { API_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientText, GradientIcon } from './GradientUI';
+import CustomAvatar from './CustomAvatar';
 
 export default function LikersModal({ visible, postId, onClose }: { visible: boolean, postId: string | null, onClose: () => void }) {
   const { tokens, mode } = useAppTheme();
@@ -42,7 +43,7 @@ export default function LikersModal({ visible, postId, onClose }: { visible: boo
         router.push(`/profile/${item._id}`);
       }}
     >
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <CustomAvatar uri={item.avatar} name={item.fullName} size={50} style={styles.avatar} />
       <View style={styles.likerInfo}>
         <Text style={[styles.name, { color: tokens.onSurface }]}>{item.fullName}</Text>
         <Text style={[styles.role, { color: tokens.onSurfaceVariant }]}>{item.role}</Text>

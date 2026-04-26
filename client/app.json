@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "agro",
+    "name": "GharsaAI",
     "slug": "agro",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo_gharsa.png",
     "scheme": "agro",
@@ -34,12 +34,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo_gharsa.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#0d631b",
           "dark": {
-            "backgroundColor": "#ffffff"
+            "backgroundColor": "#0d631b"
           }
         }
       ],

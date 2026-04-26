@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import { GradientText, GradientIcon } from '@/components/GradientUI';
 import { ActivityIndicator, Alert } from 'react-native';
 import { ML_URL } from '@/constants/config';
 
@@ -140,7 +141,7 @@ export default function AIScanScreen() {
                 {userLoading ? (
                   <SkeletonRect width={80} height={20} style={{ marginLeft: 8 }} />
                 ) : (
-                  <Text style={styles.appTitle}>{userName}</Text>
+                  <Text style={styles.appTitle} numberOfLines={1} ellipsizeMode="tail">{userName}</Text>
                 )}
               </TouchableOpacity>
               <View style={styles.topBarRight}>
@@ -150,8 +151,11 @@ export default function AIScanScreen() {
                   <LangBtn active={language === 'FR'} label="FR" onPress={() => setLanguage('FR')} />
                 </View>
                 <NotificationBell />
-                <TouchableOpacity style={styles.iconBtn} onPress={() => router.replace('/')}>
-                  <MaterialIcons name="logout" size={24} color={tokens.tertiary} />
+                <TouchableOpacity style={styles.iconBtn} onPress={async () => {
+                  await AsyncStorage.multiRemove(['userName', 'userAvatar', 'userId', 'userRole', 'token']);
+                  router.replace('/login');
+                }}>
+                  <GradientIcon colors={tokens.gradients.red} name="logout" size={24} library={MaterialIcons} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -271,9 +275,11 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: '100%',
   },
   userInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 10,
   },
   avatarContainer: {
     width: 36,

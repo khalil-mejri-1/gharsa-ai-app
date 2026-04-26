@@ -71,8 +71,8 @@ export default function TabLayout() {
     }
   };
 
-  // Hide FAB if we are on the landing page or already on the chat page
-  const showFab = pathname !== '/chat' && pathname !== '/';
+  // Hide FAB if we are already on the chatbot page
+  const showFab = pathname !== '/chatbot';
 
   return (
     <View style={{ flex: 1 }}>
@@ -219,7 +219,7 @@ export default function TabLayout() {
       {showFab && (
         <TouchableOpacity
           style={styles(tokens).fab}
-          onPress={() => router.push('/chat')}
+          onPress={() => router.push('/chatbot')}
           activeOpacity={0.8}
         >
           <LinearGradient

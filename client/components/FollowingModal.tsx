@@ -13,6 +13,7 @@ const { width, height } = Dimensions.get('window');
 import { DeviceEventEmitter } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientText } from './GradientUI';
+import CustomAvatar from './CustomAvatar';
 
 // Removed MOCK_MESSAGES
 
@@ -139,7 +140,7 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
                       }}
                     >
                       <View style={styles.noteAvatarWrapper}>
-                        <Image source={{ uri: user.avatar }} style={styles.noteAvatar} />
+                        <CustomAvatar uri={user.avatar} name={user.fullName} size={65} />
                         <LinearGradient colors={tokens.gradients.green} style={styles.onlineBadge} />
                       </View>
                       <Text style={[styles.noteName, { color: tokens.onSurface }]} numberOfLines={1}>
@@ -178,7 +179,7 @@ export default function FollowingModal({ visible, onClose }: { visible: boolean,
                     });
                   }}
                 >
-                  <Image source={{ uri: conv.avatar }} style={styles.msgAvatar} />
+                  <CustomAvatar uri={conv.avatar} name={conv.name} size={55} />
                   <View style={styles.msgContent}>
                     <Text style={[styles.msgName, { color: tokens.onSurface }]} numberOfLines={1}>{conv.name}</Text>
                     <Text 

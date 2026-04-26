@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
 import { Image } from 'expo-image';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons, FontAwesome5, Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -116,7 +116,7 @@ export default function Dashboard() {
                 {userLoading ? (
                   <SkeletonRect width={80} height={20} style={{ marginLeft: 8 }} />
                 ) : (
-                  <Text style={styles.appTitle}>{userName}</Text>
+                  <Text style={styles.appTitle} numberOfLines={1} ellipsizeMode="tail">{userName}</Text>
                 )}
               </TouchableOpacity>
               <View style={styles.topBarRight}>
@@ -127,10 +127,10 @@ export default function Dashboard() {
                 </View>
                 <NotificationBell />
                 <TouchableOpacity style={styles.iconBtn} onPress={async () => {
-                  await AsyncStorage.removeItem('userName');
-                  router.replace('/');
+                  await AsyncStorage.multiRemove(['userName', 'userAvatar', 'userId', 'userRole', 'token']);
+                  router.replace('/login');
                 }}>
-                  <MaterialIcons name="logout" size={24} color={tokens.tertiary} />
+                  <GradientIcon colors={tokens.gradients.red} name="logout" size={24} library={MaterialIcons} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -155,14 +155,21 @@ export default function Dashboard() {
             <View style={styles.heroContent}>
               <View>
                 <View style={styles.weatherRow}>
-                  <MaterialIcons name="wb-sunny" size={24} color="#ffd700" />
+                  <GradientIcon colors={tokens.gradients.yellow} name="wb-sunny" size={28} library={MaterialIcons} />
                   <Text style={styles.tempText}>{weather.temp}°C</Text>
                 </View>
                 <Text style={styles.weatherSubtext}>{weather.condition} • {t('humidity')} {weather.humidity}%</Text>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: 'rgba(255,255,255,0.8)' }]}>
-                <Text style={styles.statusText}>{t('status')}: {t('optimal')}</Text>
-              </View>
+              <LinearGradient 
+                colors={tokens.gradients.green}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.statusBadge}
+              >
+                <Text style={[styles.statusText, { color: 'white' }]}>
+                  {t('status')}: {t('optimal')}
+                </Text>
+              </LinearGradient>
             </View>
 
             {/* --- 5-Day Forecast Row --- */}
@@ -265,7 +272,6 @@ export default function Dashboard() {
           {/* --- Quick Tools --- */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>{t('smartTools')}</Text>
-            <TouchableOpacity><Text style={styles.seeAllText}>{t('viewAll')}</Text></TouchableOpacity>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.toolsScroll}>
@@ -403,9 +409,11 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: '100%',
   },
   userInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 10,
   },
   avatarContainer: {
     width: 36,

@@ -7,6 +7,7 @@ import { useAppTheme } from '@/hooks/ThemeContext';
 import { API_URL } from '@/constants/config';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GradientText } from './GradientUI';
+import CustomAvatar from './CustomAvatar';
 
 interface User {
   _id: string;
@@ -57,8 +58,10 @@ export default function ConnectionsModal({ visible, onClose, userId, type }: Con
         router.push(`/profile/${item._id}`);
       }}
     >
-      <Image 
-        source={{ uri: item.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop' }} 
+      <CustomAvatar 
+        uri={item.avatar} 
+        name={item.fullName} 
+        size={50} 
         style={styles.avatar} 
       />
       <View style={styles.userInfo}>

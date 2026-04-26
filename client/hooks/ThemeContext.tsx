@@ -30,6 +30,7 @@ export const DESIGN_TOKENS = {
       textGray: ['#757575', '#424242'],
       orange: ['#FFB75E', '#ED8F03'],
       blue: ['#42A5F5', '#1976D2'],
+      yellow: ['#fde047', '#eab308'],
     }
   },
   dark: {
@@ -61,6 +62,7 @@ export const DESIGN_TOKENS = {
       textGray: ['#B0BEC5', '#78909C'],
       orange: ['#ff9966', '#ff5e62'],
       blue: ['#00d2ff', '#3a7bd5'],
+      yellow: ['#fde047', '#facc15'],
     }
   }
 };

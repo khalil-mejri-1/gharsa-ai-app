@@ -46,6 +46,8 @@ export default function ProfileScreen() {
   const [connModalVisible, setConnModalVisible] = useState(false);
   const [connType, setConnType] = useState<'followers' | 'following'>('followers');
   const [postsModalVisible, setPostsModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -181,6 +183,26 @@ export default function ProfileScreen() {
     if (plantInput.trim() && !editPlants.includes(plantInput.trim())) {
       setEditPlants([...editPlants, plantInput.trim()]);
       setPlantInput('');
+    }
+  };
+
+  const handleDeleteAllUsers = async () => {
+    setIsDeletingAll(true);
+    try {
+      const response = await fetch(`${API_URL}/api/admin/delete-all-users`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        showToast("All accounts deleted. Logging out...", "success");
+        await AsyncStorage.clear();
+        router.replace('/');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error deleting accounts", "error");
+    } finally {
+      setIsDeletingAll(false);
+      setDeleteModalVisible(false);
     }
   };
 
@@ -341,6 +363,19 @@ export default function ProfileScreen() {
                 )}
               </View>
             </View>
+
+            {/* Admin Section (Delete All) */}
+            {isOwnProfile && (
+              <View style={[styles.section, { borderTopWidth: 1, borderTopColor: 'rgba(150,150,150,0.1)', paddingTop: 20, marginBottom: 40 }]}>
+                <TouchableOpacity 
+                  style={styles.dangerBtn} 
+                  onPress={() => setDeleteModalVisible(true)}
+                >
+                   <MaterialIcons name="delete-forever" size={20} color="#FF5252" />
+                   <Text style={styles.dangerBtnText}>Delete All Database Accounts</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </ScrollView>
       )}
@@ -453,6 +488,42 @@ export default function ProfileScreen() {
         userId={id as string}
         userName={user?.fullName || ''}
       />
+
+      {/* Delete All Accounts Confirmation Modal */}
+      <Modal visible={deleteModalVisible} transparent animationType="fade">
+        <View style={styles.confirmOverlay}>
+          <View style={[styles.confirmContent, { backgroundColor: tokens.surfaceContainerLowest }]}>
+            <View style={styles.confirmIcon}>
+              <MaterialIcons name="report-problem" size={48} color="#FF5252" />
+            </View>
+            <Text style={[styles.confirmTitle, { color: tokens.onSurface }]}>DANGER ZONE</Text>
+            <Text style={[styles.confirmText, { color: tokens.onSurfaceVariant }]}>
+              This will permanently delete ALL user accounts, posts, and notifications from the entire database. This action CANNOT be undone.
+            </Text>
+            
+            <View style={styles.confirmActions}>
+              <TouchableOpacity 
+                style={[styles.confirmBtn, { backgroundColor: tokens.surfaceContainerHigh }]} 
+                onPress={() => setDeleteModalVisible(false)}
+              >
+                <Text style={[styles.confirmBtnText, { color: tokens.onSurface }]}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.confirmBtn, { backgroundColor: '#FF5252' }]} 
+                onPress={handleDeleteAllUsers}
+                disabled={isDeletingAll}
+              >
+                {isDeletingAll ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={[styles.confirmBtnText, { color: 'white' }]}>Delete Everything</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -747,6 +818,71 @@ function getStyles(tokens: any, mode: string) {
       color: 'white',
       fontSize: 16,
       fontWeight: 'bold',
+    },
+    dangerBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      paddingVertical: 12,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: '#FF5252' + '40',
+      backgroundColor: '#FF5252' + '10',
+    },
+    dangerBtnText: {
+      color: '#FF5252',
+      fontWeight: 'bold',
+      fontSize: 14,
+    },
+    confirmOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    confirmContent: {
+      width: '100%',
+      borderRadius: 25,
+      padding: 24,
+      alignItems: 'center',
+    },
+    confirmIcon: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: '#FF5252' + '20',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    confirmTitle: {
+      fontSize: 20,
+      fontWeight: '900',
+      marginBottom: 12,
+    },
+    confirmText: {
+      textAlign: 'center',
+      fontSize: 15,
+      lineHeight: 22,
+      marginBottom: 24,
+    },
+    confirmActions: {
+      flexDirection: 'row',
+      gap: 12,
+      width: '100%',
+    },
+    confirmBtn: {
+      flex: 1,
+      height: 50,
+      borderRadius: 15,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    confirmBtnText: {
+      fontWeight: 'bold',
+      fontSize: 15,
     }
   });
 }

@@ -31,26 +31,28 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter your email and password');
+      setError(t('error') + ': ' + (language === 'AR' ? 'يرجى إدخال البريد وكلمة المرور' : 'Please enter email and password'));
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      console.log(`🚀 Attempting login at: ${API_URL}/api/auth/login`);
+      
+      const response = await fetch(`${API_URL}/api/auth/login?cache_bust=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
       const data = await response.json();
-      console.log('Login Response Data:', data);
+      console.log('✅ Server Response:', data);
 
       if (response.ok) {
-        // Success
         if (data.user) {
           await AsyncStorage.setItem('userName', data.user.fullName || 'User');
           await AsyncStorage.setItem('userId', String(data.user.id || ''));
@@ -63,10 +65,9 @@ export default function LoginPage() {
         setError(data.message || 'Invalid credentials');
       }
     } catch (error: any) {
-      console.error('Login Error:', error);
-      // If it's a fetch error (network)
+      console.error('❌ Login Error:', error);
       if (error instanceof TypeError && error.message.includes('Network request failed')) {
-        setError('Network Error: Could not connect to the server at ' + API_URL);
+        setError(language === 'AR' ? 'فشل الاتصال: تأكد من اتصالك بالإنترنت' : 'Connection failed: Check your internet');
       } else {
         setError('Login Failed: ' + (error.message || 'Unknown error occurred'));
       }
@@ -140,7 +141,7 @@ export default function LoginPage() {
               <View style={styles.avatarContainer}>
                 <Image source={require('@/assets/images/logo_gharsa.png')} style={styles.avatar} />
               </View>
-              <Text style={styles.appTitle}>{t('appTitle')}</Text>
+              <Text style={styles.appTitle} numberOfLines={1} ellipsizeMode="tail">{t('appTitle')}</Text>
             </View>
             <View style={styles.topBarRight}>
               <View style={styles.langSelector}>
@@ -374,9 +375,11 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: '100%',
   },
   userInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 10,
   },
   avatarContainer: {
     width: 36,

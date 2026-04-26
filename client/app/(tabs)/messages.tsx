@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/hooks/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
+import CustomAvatar from '@/components/CustomAvatar';
 
 const { width } = Dimensions.get('window');
 
@@ -146,7 +147,7 @@ export default function MessagesTab() {
                     }}
                   >
                     <View style={styles.noteAvatarWrapper}>
-                      <Image source={{ uri: user.avatar }} style={styles.noteAvatar} />
+                      <CustomAvatar uri={user.avatar} name={user.fullName} size={65} />
                       <LinearGradient colors={tokens.gradients.green} style={styles.onlineBadge} />
                     </View>
                     <Text style={[styles.noteName, { color: tokens.onSurface }]} numberOfLines={1}>
@@ -185,7 +186,7 @@ export default function MessagesTab() {
                     });
                   }}
                 >
-                  <Image source={{ uri: conv.avatar }} style={styles.msgAvatar} />
+                  <CustomAvatar uri={conv.avatar} name={conv.name} size={55} />
                   <View style={styles.msgContent}>
                     <Text style={[styles.msgName, { color: tokens.onSurface }]} numberOfLines={1}>{conv.name}</Text>
                     <Text 

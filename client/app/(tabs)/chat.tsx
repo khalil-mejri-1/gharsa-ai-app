@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, TextInput, Platform, Keyboard, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,12 +11,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NotificationBell from '@/components/NotificationBell';
 import CustomAvatar from '@/components/CustomAvatar';
 import { SkeletonCircle, SkeletonRect } from '@/components/Skeleton';
+import { useToast } from '@/hooks/ToastContext';
+import { GradientIcon } from '@/components/GradientUI';
+import { Alert } from 'react-native';
 
 export default function AIChat() {
   const { mode, tokens } = useAppTheme();
   const { language, setLanguage, t } = useLanguage();
   const styles = getStyles(tokens, mode);
   const router = useRouter();
+  const { showToast } = useToast();
   const [userName, setUserName] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -27,42 +31,48 @@ export default function AIChat() {
   ]);
   const [isSending, setIsSending] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<any>(null);
 
   useEffect(() => {
+    const loadUserAndHistory = async () => {
+      const uid = await AsyncStorage.getItem('userId');
+      setUserId(uid);
+      const name = await AsyncStorage.getItem('userName');
+      const avatar = await AsyncStorage.getItem('userAvatar');
+      if (name) setUserName(name);
+      if (avatar) setUserAvatar(avatar);
+      
+      if (uid) {
+        fetchHistory(uid);
+      }
+      setUserLoading(false);
+    };
+    loadUserAndHistory();
+
     const keyboardDidShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       (e) => {
         setKeyboardVisible(true);
-        // Add StatusBar height + 20px extra breathing room
-        const buffer = Platform.OS === 'android' ? ((StatusBar.currentHeight || 35) + 20) : 10;
-        setKeyboardHeight(e.endCoordinates.height + buffer);
-
-        // Scroll to bottom when keyboard opens
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+        Animated.timing(keyboardHeight, {
+          toValue: e.endCoordinates.height,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+        setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
         setKeyboardVisible(false);
-        setKeyboardHeight(0);
+        Animated.timing(keyboardHeight, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
       }
     );
-
-    const loadUser = async () => {
-      const name = await AsyncStorage.getItem('userName');
-      const avatar = await AsyncStorage.getItem('userAvatar');
-      const uid = await AsyncStorage.getItem('userId');
-      if (name) setUserName(name);
-      if (avatar) setUserAvatar(avatar);
-      if (uid) setUserId(uid);
-      setUserLoading(false);
-    };
-    loadUser();
 
     // Fetch and print available Gemini models to the console
     const loadModels = async () => {
@@ -85,10 +95,56 @@ export default function AIChat() {
     loadModels();
 
     return () => {
-      keyboardDidHideListener.remove();
       keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
     };
   }, []);
+
+  const fetchHistory = async (uid: string) => {
+    try {
+      const { API_URL } = require('@/constants/config');
+      const response = await fetch(`${API_URL}/api/aichat/${uid}`);
+      const data = await response.json();
+      if (response.ok && data.length > 0) {
+        setMessages(data.map((m: any) => ({
+          id: m._id,
+          text: m.text,
+          sender: m.sender
+        })));
+      }
+    } catch (err) {
+      console.error('Error fetching history:', err);
+    }
+  };
+
+  const saveMessage = async (text: string, sender: string) => {
+    if (!userId) return;
+    try {
+      const { API_URL } = require('@/constants/config');
+      await fetch(`${API_URL}/api/aichat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, text, sender })
+      });
+    } catch (err) {
+      console.error('Error saving message:', err);
+    }
+  };
+
+  const clearHistory = async () => {
+    if (!userId) return;
+    try {
+      const { API_URL } = require('@/constants/config');
+      const response = await fetch(`${API_URL}/api/aichat/${userId}`, { method: 'DELETE' });
+      if (response.ok) {
+        setMessages([{ id: '1', text: 'Hello! I am Gharsa AI, your agricultural expert. How can I help you today?', sender: 'ai' }]);
+        showToast('Chat history cleared', 'success');
+      }
+    } catch (err) {
+      console.error('Error clearing history:', err);
+      showToast('Failed to clear history', 'error');
+    }
+  };
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
@@ -104,6 +160,9 @@ export default function AIChat() {
     const newMsg = { id: Date.now().toString(), text: userText, sender: 'user' };
     setMessages(prev => [...prev, newMsg]);
     setMessage('');
+
+    // Save user message to DB
+    saveMessage(userText, 'user');
 
     try {
       const API_KEY = 'AIzaSyBR4k6hFxZ--4TOM-lYGMtYUmADmXme7Lw';
@@ -137,6 +196,9 @@ export default function AIChat() {
         text: aiText,
         sender: 'ai'
       }]);
+
+      // Save AI response to DB
+      saveMessage(aiText, 'ai');
     } catch (error) {
       console.error('Gemini API Error:', error);
       setMessages(prev => [...prev, {
@@ -168,29 +230,32 @@ export default function AIChat() {
               <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 10 }}>
                 <MaterialIcons name="arrow-back" size={24} color={tokens.onSurface} />
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.userInfo} 
+              <TouchableOpacity
+                style={styles.userInfo}
                 onPress={() => userId && router.push(`/profile/${userId}`)}
               >
                 <View style={styles.avatarContainer}>
                   {userLoading ? (
                     <SkeletonCircle size={40} style={styles.avatar} />
                   ) : (
-                    <CustomAvatar 
-                      uri={userAvatar} 
-                      name={userName} 
-                      size={40} 
-                      style={styles.avatar} 
+                    <CustomAvatar
+                      uri={userAvatar}
+                      name={userName}
+                      size={40}
+                      style={styles.avatar}
                     />
                   )}
                 </View>
                 {userLoading ? (
                   <SkeletonRect width={80} height={20} style={{ marginLeft: 8 }} />
                 ) : (
-                  <Text style={styles.appTitle}>{userName}</Text>
+                  <Text style={styles.appTitle} numberOfLines={1} ellipsizeMode="tail">{userName}</Text>
                 )}
               </TouchableOpacity>
               <View style={styles.topBarRight}>
+                <TouchableOpacity style={{ marginRight: 15 }} onPress={clearHistory}>
+                  <GradientIcon colors={tokens.gradients.red} name="delete-sweep" size={26} library={MaterialIcons} />
+                </TouchableOpacity>
                 <View style={styles.langSelector}>
                   <LangBtn active={language === 'EN'} label="EN" onPress={() => setLanguage('EN')} />
                   <LangBtn active={language === 'AR'} label="AR" onPress={() => setLanguage('AR')} />
@@ -209,14 +274,14 @@ export default function AIChat() {
         </View>
 
         <View style={{ flex: 1 }}>
-          <ScrollView 
+          <ScrollView
             ref={scrollViewRef}
-            contentContainerStyle={styles.chatScroll} 
+            contentContainerStyle={styles.chatScroll}
             showsVerticalScrollIndicator={false}
           >
             {/* AI Header Area */}
             <View style={styles.aiHeaderArea}>
-              <LinearGradient 
+              <LinearGradient
                 colors={tokens.gradients.green}
                 style={styles.aiIconContainer}
               >
@@ -235,8 +300,8 @@ export default function AIChat() {
                   </LinearGradient>
                 )}
                 {msg.sender === 'user' ? (
-                  <LinearGradient 
-                    colors={tokens.gradients.green} 
+                  <LinearGradient
+                    colors={tokens.gradients.green}
                     style={[styles.messageBubble, styles.messageBubbleUser]}
                   >
                     <Text style={[styles.messageText, styles.messageTextUser]}>
@@ -255,7 +320,12 @@ export default function AIChat() {
           </ScrollView>
 
           {/* Input Area */}
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, {
+            paddingBottom: keyboardHeight.interpolate({
+              inputRange: [0, 1000],
+              outputRange: [16, 1040] // base padding 16 + 40 offset
+            })
+          }]}>
             <TextInput
               style={styles.textInput}
               placeholder="Ask the AI expert..."
@@ -276,11 +346,11 @@ export default function AIChat() {
                 )}
               </LinearGradient>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
-          {/* Dynamic Exact Spacer */}
+          {/* Fixed Spacer for bottom navigation */}
           <View style={{
-            height: isKeyboardVisible ? keyboardHeight : 85,
+            height: 80,
             backgroundColor: mode === 'dark' ? tokens.surfaceContainerLow : '#ffffff'
           }} />
         </View>
@@ -352,10 +422,11 @@ const getStyles = (tokens: any, mode: 'light' | 'dark') => StyleSheet.create({
     height: '100%',
   },
   userInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    flex: 1,
+    marginRight: 10,
   },
   avatarContainer: {
     width: 36,

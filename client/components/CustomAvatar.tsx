@@ -4,15 +4,22 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKGROUND_COLORS = [
-  ['#FF8A65', '#D84315'],
-  ['#4DB6AC', '#00695C'],
-  ['#7986CB', '#283593'],
-  ['#F06292', '#AD1457'],
-  ['#BA68C8', '#6A1B9A'],
-  ['#4DD0E1', '#00838F'],
-  ['#AED581', '#558B2F'],
-  ['#FFD54F', '#FF8F00'],
-  ['#81C784', '#2E7D32'],
+  ['#FF5252', '#C62828'], // Red
+  ['#FF4081', '#AD1457'], // Pink
+  ['#E040FB', '#6A1B9A'], // Purple
+  ['#7C4DFF', '#4527A0'], // Deep Purple
+  ['#536DFE', '#283593'], // Indigo
+  ['#448AFF', '#1565C0'], // Blue
+  ['#40C4FF', '#007BB2'], // Light Blue
+  ['#18FFFF', '#00838F'], // Cyan
+  ['#64FFDA', '#00695C'], // Teal
+  ['#69F0AE', '#2E7D32'], // Green
+  ['#B2FF59', '#558B2F'], // Light Green
+  ['#EEFF41', '#9E9D24'], // Lime
+  ['#FFFF00', '#F9A825'], // Yellow
+  ['#FFD740', '#FF8F00'], // Amber
+  ['#FFAB40', '#EF6C00'], // Orange
+  ['#FF6E40', '#D84315'], // Deep Orange
 ];
 
 interface CustomAvatarProps {
@@ -23,8 +30,19 @@ interface CustomAvatarProps {
 }
 
 export default function CustomAvatar({ uri, name, size = 40, style }: CustomAvatarProps) {
-  const isDefaultUnsplash = uri && typeof uri === 'string' && uri.includes('unsplash.com');
-  const hasValidUri = uri && typeof uri === 'string' && uri.trim().length > 0 && !isDefaultUnsplash;
+  // Enhanced check for valid URIs
+  const hasValidUri = uri && 
+                     typeof uri === 'string' && 
+                     uri.trim().length > 0 && 
+                     uri.startsWith('http') && 
+                     !uri.includes('unsplash.com/photos/default') &&
+                     !uri.includes('photo-1472099645785-5658abf4ff4e') && 
+                     !uri.includes('photo-1438761681033-6461ffad8d80') && 
+                     !uri.includes('photo-1507003211169-0a1dd7228f2d') && 
+                     !uri.includes('photo-1500648767791-00dcc994a43e') &&
+                     !uri.includes('photo-1544005313-94ddf0286df2') &&
+                     !uri.includes('photo-1506794778202-cad84cf45f1d') &&
+                     !uri.includes('photo-1534528741775-53994a69daeb');
 
   if (hasValidUri) {
     return (
@@ -36,9 +54,27 @@ export default function CustomAvatar({ uri, name, size = 40, style }: CustomAvat
     );
   }
 
-  const char = (name && name.trim().length > 0) ? name.trim().charAt(0).toUpperCase() : '?';
-  const colorIndex = name ? name.charCodeAt(0) % BACKGROUND_COLORS.length : 0;
-  const colors = BACKGROUND_COLORS[colorIndex];
+  // Fallback to Initials
+  const getInitial = (str: string | null | undefined) => {
+    if (!str || str.trim().length === 0) return '?';
+    const trimmed = str.trim();
+    // Support for both Latin and Arabic/other scripts
+    return trimmed.charAt(0).toUpperCase();
+  };
+
+  const char = getInitial(name);
+  
+  // Deterministic color based on name
+  const getColorIndex = (str: string | null | undefined) => {
+    if (!str) return 0;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % BACKGROUND_COLORS.length;
+  };
+
+  const colors = BACKGROUND_COLORS[getColorIndex(name)];
 
   return (
     <LinearGradient 
@@ -50,11 +86,25 @@ export default function CustomAvatar({ uri, name, size = 40, style }: CustomAvat
           height: size, 
           borderRadius: size / 2, 
           justifyContent: 'center', 
-          alignItems: 'center' 
+          alignItems: 'center',
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         }
       ]}
     >
-      <Text style={{ color: 'white', fontWeight: 'bold', fontSize: size * 0.45 }}>
+      <Text 
+        style={{ 
+          color: 'white', 
+          fontWeight: '900', 
+          fontSize: size * 0.45, 
+          textAlign: 'center',
+          includeFontPadding: false,
+          textAlignVertical: 'center',
+        }}
+      >
         {char}
       </Text>
     </LinearGradient>

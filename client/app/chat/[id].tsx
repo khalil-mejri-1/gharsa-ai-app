@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator, Modal, Animated, DeviceEventEmitter, BackHandler, Pressable, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, TextInput, Platform, Keyboard, ActivityIndicator, Modal, Animated, DeviceEventEmitter, BackHandler, Pressable, TouchableWithoutFeedback } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,7 +23,7 @@ export default function DirectMessageScreen() {
   const { mode, tokens } = useAppTheme();
   const { language, t } = useLanguage();
   const { showToast, showConfirm } = useToast();
-  const styles = getStyles(tokens, mode, Platform.OS === 'web' ? false : isKeyboardVisible);
+  const styles = getStyles(tokens, mode, isKeyboardVisible, keyboardHeight);
   const router = useRouter();
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -37,12 +37,33 @@ export default function DirectMessageScreen() {
 
   const scrollViewRef = useRef<any>(null);
   const menuAnim = useRef(new Animated.Value(0)).current;
-
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    const keyboardDidShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardVisible(true);
+        Animated.timing(keyboardHeight, {
+          toValue: e.endCoordinates.height,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+        setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+        Animated.timing(keyboardHeight, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+      }
+    );
 
     loadUserAndMessages();
 
@@ -81,6 +102,8 @@ export default function DirectMessageScreen() {
     return () => {
       messageListener.remove();
       backHandler.remove();
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
     };
   }, [id, currentUserId]);
 
@@ -321,14 +344,14 @@ export default function DirectMessageScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.userInfo} onPress={() => router.push(`/profile/${id}`)}>
-            <CustomAvatar 
-              uri={targetUserAvatar as string} 
-              name={targetUserName as string} 
-              size={44} 
-              style={styles.avatar} 
+            <CustomAvatar
+              uri={targetUserAvatar as string}
+              name={targetUserName as string}
+              size={44}
+              style={styles.avatar}
             />
             <View>
-              <Text style={styles.userName}>{targetUserName}</Text>
+              <Text style={styles.userName} numberOfLines={1} ellipsizeMode="tail">{targetUserName}</Text>
               <GradientText colors={tokens.gradients.green} style={styles.status}>Online</GradientText>
             </View>
           </TouchableOpacity>
@@ -340,11 +363,7 @@ export default function DirectMessageScreen() {
           </View>
         </View>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : -60} // Negative offset to prevent over-lifting on Android
-        >
+        <View style={{ flex: 1 }}>
           {loading ? (
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <ActivityIndicator size="large" color={tokens.gradients.green[0]} />
@@ -418,9 +437,9 @@ export default function DirectMessageScreen() {
           {/* Plus Menu Overlay & Content */}
           {showPlusMenu && (
             <>
-              <Pressable 
-                style={[StyleSheet.absoluteFill, { zIndex: 999 }]} 
-                onPress={togglePlusMenu} 
+              <Pressable
+                style={[StyleSheet.absoluteFill, { zIndex: 999 }]}
+                onPress={togglePlusMenu}
               />
               <Animated.View style={[styles.plusMenu, {
                 opacity: menuAnim,
@@ -452,15 +471,20 @@ export default function DirectMessageScreen() {
           )}
 
           {/* Input Area */}
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, {
+            paddingBottom: keyboardHeight.interpolate({
+              inputRange: [0, 1000],
+              outputRange: [Platform.OS === 'ios' ? 70 : 60, 1000 + (Platform.OS === 'ios' ? 40 : 30)]
+            })
+          }]}>
             <View style={[styles.inputBlur, { backgroundColor: mode === 'dark' ? '#0A2013' : '#E8F5E9', borderColor: mode === 'dark' ? '#113A22' : '#C8E6C9' }]}>
               {isRecording ? (
                 <TouchableOpacity style={styles.cancelBtn} onPress={cancelRecording}>
                   <GradientIcon colors={tokens.gradients.red} name="close-circle" size={32} library={Ionicons} />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity 
-                  style={[styles.attachBtn, { borderColor: tokens.gradients.green[0] + '60' }]} 
+                <TouchableOpacity
+                  style={[styles.attachBtn, { borderColor: tokens.gradients.green[0] + '60' }]}
                   onPress={togglePlusMenu}
                 >
                   <GradientIcon colors={tokens.gradients.green} name="add" size={22} library={Ionicons} />
@@ -503,14 +527,14 @@ export default function DirectMessageScreen() {
                 </LinearGradient>
               </TouchableOpacity>
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </Animated.View>
+        </View>
       </SafeAreaView>
     </View>
   );
 }
 
-const getStyles = (tokens: any, mode: string, isKeyboardVisible: boolean) => StyleSheet.create({
+const getStyles = (tokens: any, mode: string, isKeyboardVisible: boolean, keyboardHeight: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -599,7 +623,7 @@ const getStyles = (tokens: any, mode: string, isKeyboardVisible: boolean) => Sty
   inputContainer: {
     paddingHorizontal: 15,
     paddingTop: 10,
-    paddingBottom: isKeyboardVisible ? 10 : 65, // Lowered when closed as requested
+    paddingBottom: Platform.OS === 'ios' ? 70 : 60,
     backgroundColor: mode === 'dark' ? '#0b1a13' : '#ffffff', // Solid background
   },
   inputBlur: {
@@ -646,7 +670,7 @@ const getStyles = (tokens: any, mode: string, isKeyboardVisible: boolean) => Sty
   },
   plusMenu: {
     position: 'absolute',
-    bottom: isKeyboardVisible ? 60 : 110,
+    bottom: 110,
     left: 20,
     zIndex: 1000,
     width: 140,

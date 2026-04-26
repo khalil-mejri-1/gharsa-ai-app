@@ -573,9 +573,29 @@ app.delete('/api/notifications/:userId', async (req, res) => {
   }
 });
 
+// --- Admin Endpoints (Dangerous) ---
+app.delete('/api/admin/delete-all-users', async (req, res) => {
+  try {
+    // Delete all users
+    await User.deleteMany({});
+    // Also delete all posts and notifications to avoid orphans
+    await Post.deleteMany({});
+    await Notification.deleteMany({});
+    
+    // Clear the socket map
+    for (let key in userSockets) delete userSockets[key];
+
+    res.json({ message: 'All accounts and associated data deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Message Routes
 const messageRoutes = require('./routes/messages');
+const aichatRoutes = require('./routes/aichat');
 app.use('/api/messages', messageRoutes);
+app.use('/api/aichat', aichatRoutes);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, { dbName: 'gharsa' })
