@@ -29,15 +29,15 @@ app.post('/api/upload-audio', async (req, res) => {
 
     const fileName = `voice_${userId}_${Date.now()}.m4a`;
     const filePath = path.join(__dirname, 'uploads', fileName);
-    
+
     // Remove header if present (data:audio/m4a;base64,)
     const base64Data = audio.replace(/^data:audio\/\w+;base64,/, '');
-    
+
     fs.writeFileSync(filePath, base64Data, 'base64');
-    
+
     const serverUrl = `${req.protocol}://${req.get('host')}`;
     const audioUrl = `${serverUrl}/uploads/${fileName}`;
-    
+
     res.json({ audioUrl });
   } catch (err) {
     console.error('Upload error:', err);
@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Gharsa API is running');
+  res.send('Gharsa API is running 1/5/2026');
 });
 
 // Notification Schema
@@ -367,6 +367,32 @@ app.get('/api/users/following/:userId', async (req, res) => {
   }
 });
 
+// Get mutual friends (Mutual following)
+app.get('/api/users/friends/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).populate('following', 'fullName firstName lastName profilePicture avatar followers following');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Filter to find only those who follow the user back
+    const mutuals = (user.following || []).filter(f => {
+      // Check if current userId is in the target user's following list
+      return f.following && f.following.some(id => id.toString() === req.params.userId);
+    }).map(f => {
+      const fObj = f.toObject();
+      return {
+        ...fObj,
+        fullName: f.fullName || `${f.firstName || ''} ${f.lastName || ''}`.trim() || 'User',
+        avatar: f.profilePicture || f.avatar || ''
+      };
+    });
+
+    res.json(mutuals);
+  } catch (err) {
+    console.error('Error fetching friends:', err);
+    res.status(500).json(err);
+  }
+});
+
 // --- Community / Post Endpoints ---
 
 // Get all posts
@@ -581,7 +607,7 @@ app.delete('/api/admin/delete-all-users', async (req, res) => {
     // Also delete all posts and notifications to avoid orphans
     await Post.deleteMany({});
     await Notification.deleteMany({});
-    
+
     // Clear the socket map
     for (let key in userSockets) delete userSockets[key];
 
