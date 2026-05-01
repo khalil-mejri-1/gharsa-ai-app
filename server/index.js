@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Gharsa API is running');
+  res.send('Gharsa API is running 1/5/2026');
 });
 
 // Notification Schema
