@@ -89,6 +89,7 @@ const userSchema = new mongoose.Schema({
   plants: { type: [String], default: [] },
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  expoPushToken: String,
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -250,6 +251,17 @@ app.post('/api/auth/google', async (req, res) => {
 });
 */
 
+// Push Token Registration
+app.post('/api/users/push-token', async (req, res) => {
+  const { userId, pushToken } = req.body;
+  try {
+    await User.findByIdAndUpdate(userId, { expoPushToken: pushToken });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to register push token' });
+  }
+});
+
 // --- Profile & Following Endpoints ---
 
 // Get user profile
@@ -337,6 +349,16 @@ app.post('/api/users/follow/:id', async (req, res) => {
 
       if (userSockets[targetId.toString()]) {
         io.to(userSockets[targetId.toString()]).emit('newNotification', notification);
+      }
+
+      // Send Push Notification
+      if (targetUser.expoPushToken) {
+        const { sendPushNotification } = require('./utils/pushNotifications');
+        sendPushNotification(
+          targetUser.expoPushToken,
+          'New Follower',
+          `${currentUser.fullName || 'Someone'} started following you.`
+        );
       }
 
       res.json({ following: true });
@@ -461,6 +483,17 @@ app.post('/api/posts/:id/like', async (req, res) => {
           if (userSockets[post.user.toString()]) {
             io.to(userSockets[post.user.toString()]).emit('newNotification', notification);
           }
+
+          // Send Push Notification
+          const postOwner = await User.findById(post.user);
+          if (postOwner && postOwner.expoPushToken) {
+            const { sendPushNotification } = require('./utils/pushNotifications');
+            sendPushNotification(
+              postOwner.expoPushToken,
+              'New Like',
+              `${liker.fullName || 'Someone'} liked your post.`
+            );
+          }
         }
       }
     } else {
@@ -531,6 +564,17 @@ app.post('/api/posts/:id/comment', async (req, res) => {
       await notification.save();
       if (userSockets[post.user.toString()]) {
         io.to(userSockets[post.user.toString()]).emit('newNotification', notification);
+      }
+
+      // Send Push Notification
+      const postOwner = await User.findById(post.user);
+      if (postOwner && postOwner.expoPushToken) {
+        const { sendPushNotification } = require('./utils/pushNotifications');
+        sendPushNotification(
+          postOwner.expoPushToken,
+          'New Comment',
+          `${user.fullName || 'Someone'} commented on your post.`
+        );
       }
     }
 

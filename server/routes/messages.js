@@ -44,6 +44,17 @@ router.post('/', async (req, res) => {
       if (receiverSocketId) {
         io.to(receiverSocketId).emit('newNotification', notification);
       }
+
+      // Send Push Notification
+      const receiver = await User.findById(receiverId);
+      if (receiver && receiver.expoPushToken) {
+        const { sendPushNotification } = require('../utils/pushNotifications');
+        sendPushNotification(
+          receiver.expoPushToken,
+          'New Message',
+          `${sender.fullName || 'Someone'} sent you a message: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`
+        );
+      }
     }
     
     res.status(201).json(newMessage);
