@@ -447,9 +447,23 @@ app.post('/api/posts', async (req, res) => {
     });
 
     await newPost.save();
-    // Broadcast new post to everyone in the feed
+    // Broadcast new post to everyone in the feed (for immediate UI update)
     io.to('feed').emit('newPost', newPost);
-    console.log('Post saved successfully');
+    
+    // Find mutual friends (amis: followers who the user is also following)
+    const followingStrs = user.following.map(id => id.toString());
+    const mutualFriends = user.followers.filter(id => followingStrs.includes(id.toString()));
+    
+    // Emit 'newFriendPost' specifically to mutual friends who are online
+    const userSockets = req.app.get('userSockets');
+    mutualFriends.forEach(friendId => {
+      const socketId = userSockets[friendId.toString()];
+      if (socketId) {
+        io.to(socketId).emit('newFriendPost', newPost);
+      }
+    });
+
+    console.log(`Post saved. Notified ${mutualFriends.length} mutual friends.`);
     res.status(201).json(newPost);
   } catch (error) {
     console.error('Post creation error:', error.message);
