@@ -610,6 +610,19 @@ app.delete('/api/posts/:id', async (req, res) => {
   }
 });
 
+// Delete ALL posts (DANGER WIPE)
+app.delete('/api/posts/wipe-all/danger', async (req, res) => {
+  try {
+    await Post.deleteMany({});
+    // Optionally delete all notifications related to posts (likes, comments)
+    await Notification.deleteMany({ type: { $in: ['like', 'comment'] } });
+    io.to('feed').emit('allPostsDeleted');
+    res.json({ message: 'All posts, likes, and comments deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Delete a comment
 app.delete('/api/posts/:postId/comments/:commentId', async (req, res) => {
   try {
